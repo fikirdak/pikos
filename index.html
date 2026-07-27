@@ -4260,7 +4260,7 @@
                             alert("Mola bitti! Haydi odaklanıp tekrar çalışmaya başlayalım.");
                             isWorkMode = true;
                             pomoTimeLeft = WORK_TIME;
-                            document.getElementById('pomoLabel').textContent = "ÇALIŞMA (30 DK)";
+                            document.getElementById('pomoLabel').textContent = "POMODORO";
                             document.getElementById('pomodoro').classList.remove('break-mode');
                         }
                         updatePomoDisplay();
@@ -4276,7 +4276,7 @@
             pomoTimeLeft = WORK_TIME;
             document.getElementById('pomoPlayIcon').style.display = 'block';
             document.getElementById('pomoPauseIcon').style.display = 'none';
-            document.getElementById('pomoLabel').textContent = "ÇALIŞMA (30 DK)";
+            document.getElementById('pomoLabel').textContent = "POMODORO";
             document.getElementById('pomodoro').classList.remove('break-mode');
             updatePomoDisplay();
         }
@@ -4355,9 +4355,9 @@
 
     <div id="pomodoro" class="pomodoro-container">
         <button class="pomo-close-btn" onclick="closePomodoro()" title="Gizle">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
         </button>
-        <div id="pomoLabel" class="pomo-label">ÇALIŞMA (30 DK)</div>
+        <div id="pomoLabel" class="pomo-label">POMODORO</div>
         <div id="pomoTime" class="pomo-time">30:00</div>
         <div class="pomo-controls">
             <button class="pomo-btn" onclick="togglePomodoro()" id="pomoToggleBtn" title="Başlat/Duraklat">
