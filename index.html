@@ -532,7 +532,7 @@
         /* Pomodoro Widget */
         .pomodoro-container {
             position: fixed;
-            bottom: 2rem;
+            top: 2rem;
             right: 2rem;
             background: rgba(15, 23, 42, 0.85);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -547,7 +547,12 @@
             z-index: 1000;
             min-width: 140px;
             border-top: 3px solid var(--primary);
-            transition: all 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease;
+            cursor: grab;
+            user-select: none;
+        }
+        .pomodoro-container:active {
+            cursor: grabbing;
         }
 
         .pomodoro-container.break-mode {
@@ -595,12 +600,62 @@
             transform: scale(1.1);
         }
         
+        .pomo-close-btn {
+            position: absolute;
+            top: 0.4rem;
+            right: 0.4rem;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .pomo-close-btn:hover {
+            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .pomo-show-btn {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 999;
+            transition: all 0.3s ease;
+        }
+        .pomo-show-btn:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
         @media (max-width: 600px) {
             .pomodoro-container {
-                bottom: 1rem;
+                top: 1rem;
                 right: 1rem;
+                bottom: auto;
                 padding: 0.75rem 1rem;
                 min-width: 120px;
+            }
+            .pomo-show-btn {
+                top: 0.5rem;
+                right: 0.5rem;
             }
             .pomo-time { font-size: 1.8rem; }
             .pomo-btn { width: 32px; height: 32px; }
@@ -4294,7 +4349,14 @@
     </script>
 
     <!-- Pomodoro Widget -->
+    <button id="pomoShowBtn" class="pomo-show-btn" onclick="showPomodoro()" title="Pomodoro'yu Göster">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+    </button>
+
     <div id="pomodoro" class="pomodoro-container">
+        <button class="pomo-close-btn" onclick="closePomodoro()" title="Gizle">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
         <div id="pomoLabel" class="pomo-label">ÇALIŞMA (30 DK)</div>
         <div id="pomoTime" class="pomo-time">30:00</div>
         <div class="pomo-controls">
@@ -4308,5 +4370,74 @@
         </div>
     </div>
 
+    <script>
+        // Make Pomodoro Draggable
+        const pomo = document.getElementById('pomodoro');
+        let isDraggingPomo = false;
+        let startXPomo, startYPomo, initialXPomo, initialYPomo;
+
+        pomo.addEventListener('mousedown', dragStartPomo);
+        pomo.addEventListener('touchstart', dragStartPomo, {passive: true});
+
+        document.addEventListener('mousemove', dragPomo);
+        document.addEventListener('touchmove', dragPomo, {passive: false});
+
+        document.addEventListener('mouseup', dragEndPomo);
+        document.addEventListener('touchend', dragEndPomo);
+
+        function dragStartPomo(e) {
+            // Do not start drag if clicking a button inside it
+            if (e.target.closest('button')) return;
+            
+            isDraggingPomo = true;
+            
+            if (e.type === 'touchstart') {
+                startXPomo = e.touches[0].clientX;
+                startYPomo = e.touches[0].clientY;
+            } else {
+                startXPomo = e.clientX;
+                startYPomo = e.clientY;
+            }
+
+            const rect = pomo.getBoundingClientRect();
+            initialXPomo = rect.left;
+            initialYPomo = rect.top;
+        }
+
+        function dragPomo(e) {
+            if (!isDraggingPomo) return;
+            
+            let currentX, currentY;
+            if (e.type === 'touchmove') {
+                currentX = e.touches[0].clientX;
+                currentY = e.touches[0].clientY;
+            } else {
+                currentX = e.clientX;
+                currentY = e.clientY;
+            }
+
+            const diffX = currentX - startXPomo;
+            const diffY = currentY - startYPomo;
+
+            pomo.style.left = `${initialXPomo + diffX}px`;
+            pomo.style.top = `${initialYPomo + diffY}px`;
+            pomo.style.bottom = 'auto'; 
+            pomo.style.right = 'auto'; 
+        }
+
+        function dragEndPomo(e) {
+            isDraggingPomo = false;
+        }
+
+        function closePomodoro() {
+            document.getElementById('pomodoro').style.display = 'none';
+            document.getElementById('pomoShowBtn').style.display = 'flex';
+        }
+
+        function showPomodoro() {
+            document.getElementById('pomodoro').style.display = 'flex';
+            document.getElementById('pomoShowBtn').style.display = 'none';
+        }
+    </script>
 </body>
 </html>
