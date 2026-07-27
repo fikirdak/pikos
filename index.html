@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>KPSS Tarih Bilgi Kartları</title>
+    <title>PİKOS SORU BANKASI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -324,6 +324,108 @@
             .controls { flex-direction: column; width: 100%; max-width: 300px; }
             select { width: 100%; }
         }
+    
+        /* Home Grid */
+        .home-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            width: 100%;
+            max-width: 1000px;
+            margin-top: 1rem;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .category-btn {
+            position: relative;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 2rem 1.5rem;
+            color: white;
+            font-size: 1.25rem;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .category-btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: inherit;
+            filter: brightness(1.3);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+
+        .category-btn:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4);
+        }
+
+        .category-btn:hover::before {
+            opacity: 0.2;
+        }
+
+        .cat-subtitle {
+            font-size: 0.9rem;
+            font-weight: 400;
+            opacity: 0.8;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            z-index: 100;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(-3px);
+        }
+
+        #flashcardMode {
+            width: 100%;
+            display: none; /* hidden by default */
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            .back-btn {
+                position: relative;
+                top: 0;
+                left: 0;
+                margin-bottom: 1.5rem;
+                align-self: flex-start;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -333,11 +435,70 @@
     <div class="blob blob-2"></div>
 
     <header>
-        <h1>Tarihin Pusulası</h1>
+        <h1>PİKOS SORU BANKASI</h1>
         <p class="subtitle">KPSS Hazırlık Bilgi Kartları</p>
     </header>
 
-    <div class="controls">
+    
+    <button id="backBtn" class="back-btn" style="display: none;" onclick="showHome()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Anasayfaya Dön
+    </button>
+
+    <div id="homeMode" class="home-grid">
+        <button class="category-btn" style="border-left: 6px solid #3b82f6;" onclick="startCategory('islamiyet_oncesi')">
+            İslamiyet Öncesi
+            <span class="cat-subtitle" id="count_islamiyet_oncesi">Tarih Bilgi Kartları</span>
+        </button>
+        <button class="category-btn" style="border-left: 6px solid #10b981;" onclick="startCategory('ilk_turk_islam')">
+            İlk Türk İslam
+            <span class="cat-subtitle" id="count_ilk_turk_islam">Tarih Bilgi Kartları</span>
+        </button>
+        <button class="category-btn" style="border-left: 6px solid #8b5cf6;" onclick="startCategory('osmanli')">
+            Osmanlı Devleti
+            <span class="cat-subtitle" id="count_osmanli">Tarih Bilgi Kartları</span>
+        </button>
+        <button class="category-btn" style="border-left: 6px solid #ef4444;" onclick="startCategory('inkilap')">
+            İnkılap Tarihi
+            <span class="cat-subtitle" id="count_inkilap">Tarih Bilgi Kartları</span>
+        </button>
+        <button class="category-btn" style="border-left: 6px solid #f59e0b;" onclick="startCategory('cagdas')">
+            Çağdaş Türk ve Dünya
+            <span class="cat-subtitle" id="count_cagdas">Tarih Bilgi Kartları</span>
+        </button>
+        <button class="category-btn" style="border-left: 6px solid #ec4899;" onclick="startCategory('karisik')">
+            Karışık Çözüm
+            <span class="cat-subtitle" id="count_karisik">Tüm Kategoriler</span>
+        </button>
+        
+        <div style="grid-column: 1 / -1; margin-top: 1rem;">
+            <h3 style="color: var(--text-muted); font-weight: 500; font-size: 1.1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">Çıkmış Sorular (ÖSYM Arşivi)</h3>
+        </div>
+        
+        <button class="category-btn" style="background: linear-gradient(145deg, rgba(59, 130, 246, 0.2), rgba(30, 41, 59, 0.7)); border-left: 6px solid #3b82f6;" onclick="startCategory('cikmis_islamiyet')">
+            Çıkmış: İslamiyet Öncesi
+            <span class="cat-subtitle" id="count_cikmis_islamiyet">Geçmiş Yıllar Soru Havuzu</span>
+        </button>
+        <button class="category-btn" style="background: linear-gradient(145deg, rgba(16, 185, 129, 0.2), rgba(30, 41, 59, 0.7)); border-left: 6px solid #10b981;" onclick="startCategory('cikmis_turk_islam')">
+            Çıkmış: İlk Türk İslam
+            <span class="cat-subtitle" id="count_cikmis_turk_islam">Geçmiş Yıllar Soru Havuzu</span>
+        </button>
+        <button class="category-btn" style="background: linear-gradient(145deg, rgba(139, 92, 246, 0.2), rgba(30, 41, 59, 0.7)); border-left: 6px solid #8b5cf6;" onclick="startCategory('cikmis_osmanli')">
+            Çıkmış: Osmanlı
+            <span class="cat-subtitle" id="count_cikmis_osmanli">Geçmiş Yıllar Soru Havuzu</span>
+        </button>
+        <button class="category-btn" style="background: linear-gradient(145deg, rgba(239, 68, 68, 0.2), rgba(30, 41, 59, 0.7)); border-left: 6px solid #ef4444;" onclick="startCategory('cikmis_inkilap')">
+            Çıkmış: İnkılap
+            <span class="cat-subtitle" id="count_cikmis_inkilap">Geçmiş Yıllar Soru Havuzu</span>
+        </button>
+        <button class="category-btn" style="background: linear-gradient(145deg, rgba(245, 158, 11, 0.2), rgba(30, 41, 59, 0.7)); border-left: 6px solid #f59e0b;" onclick="startCategory('cikmis_cagdas')">
+            Çıkmış: Çağdaş
+            <span class="cat-subtitle" id="count_cikmis_cagdas">Geçmiş Yıllar Soru Havuzu</span>
+        </button>
+    </div>
+
+    <div id="flashcardMode">
+        <div class="controls">
         <select id="unitSelect" onchange="changeUnit()">
             <optgroup label="Konu Anlatımı (Pusula Notları)">
                 <option value="islamiyet_oncesi">İslamiyet Öncesi Türk Tarihi</option>
@@ -384,9 +545,16 @@
     </div>
 
     <div class="navigation">
+        <button class="btn" style="background-color: #8b5cf6; color: white; border: none; padding: 0.75rem 1rem;" onclick="shuffleCurrentQuestions()" title="Soruları Karıştır">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+        </button>
         <button class="btn" onclick="prevCard()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
             Önceki
+        </button>
+        <button class="btn" style="background-color: #10b981; color: white; border: none; padding: 0.75rem 1rem;" onclick="markAsLearned()" title="Soruyu en sona gönder">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            Öğrendim
         </button>
         <button class="btn btn-primary" onclick="nextCard()">
             Sonraki
@@ -402,6 +570,7 @@
         <div class="progress-bar-bg">
             <div class="progress-bar-fill" id="progressBar"></div>
         </div>
+    </div>
     </div>
 
     <script>
@@ -2524,6 +2693,38 @@
         const unitNameDisplay = document.getElementById('unitNameDisplay');
         const unitSelect = document.getElementById('unitSelect');
 
+
+        
+        function updateCategoryCounts() {
+            let total = 0;
+            for (let key in flashcardsData) {
+                const el = document.getElementById('count_' + key);
+                if (el && flashcardsData[key]) {
+                    el.textContent = flashcardsData[key].length + " Soru";
+                    total += flashcardsData[key].length;
+                }
+            }
+            const elKarisik = document.getElementById('count_karisik');
+            if (elKarisik) {
+                elKarisik.textContent = "Toplam " + total + " Soru";
+            }
+        }
+
+        function showHome() {
+            updateCategoryCounts();
+            document.getElementById('flashcardMode').style.display = 'none';
+            document.getElementById('backBtn').style.display = 'none';
+            document.getElementById('homeMode').style.display = 'grid';
+        }
+
+        function startCategory(cat) {
+            unitSelect.value = cat;
+            document.getElementById('homeMode').style.display = 'none';
+            document.getElementById('flashcardMode').style.display = 'flex';
+            document.getElementById('backBtn').style.display = 'flex';
+            changeUnit();
+        }
+
         function init() {
             unitNameDisplay.textContent = unitNames[currentUnit];
             loadQuestions();
@@ -2623,6 +2824,43 @@
             }
         }
 
+        function markAsLearned() {
+            if (currentQuestions.length > 1 && currentIndex < currentQuestions.length - 1) {
+                const currentCard = currentQuestions.splice(currentIndex, 1)[0];
+                currentQuestions.push(currentCard);
+                
+                if (isFlipped) {
+                    flipCard();
+                    setTimeout(() => {
+                        loadCard();
+                        updateProgress();
+                    }, 300);
+                } else {
+                    loadCard();
+                    updateProgress();
+                }
+            }
+        }
+
+        function shuffleCurrentQuestions() {
+            for (let i = currentQuestions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [currentQuestions[i], currentQuestions[j]] = [currentQuestions[j], currentQuestions[i]];
+            }
+            currentIndex = 0;
+            if(isFlipped) {
+                flashcardEl.classList.remove('is-flipped');
+                isFlipped = false;
+                setTimeout(() => {
+                    loadCard();
+                    updateProgress();
+                }, 300);
+            } else {
+                loadCard();
+                updateProgress();
+            }
+        }
+
         function updateProgress() {
             const total = currentQuestions.length;
             const current = currentIndex + 1;
@@ -2632,7 +2870,7 @@
         }
 
         // Initialize on load
-        window.onload = init;
+        window.onload = showHome;
         
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
