@@ -286,10 +286,15 @@
 
         .progress-bar-bg {
             width: 100%;
-            height: 6px;
+            height: 12px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             overflow: hidden;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .progress-bar-bg:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .progress-bar-fill {
@@ -426,6 +431,172 @@
             }
         }
 
+    
+        /* Star Button */
+        .star-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--card-border);
+            color: #fbbf24;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 20;
+        }
+        
+        .star-btn:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .star-btn.active svg {
+            fill: #fbbf24;
+        }
+
+    
+        /* Search Bar */
+        .search-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1.2rem 1.5rem;
+            padding-right: 4rem;
+            background: rgba(30, 41, 59, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 50px;
+            color: var(--text-main);
+            font-size: 1.1rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+            background: rgba(30, 41, 59, 1);
+        }
+
+        .search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .search-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+    
+        /* Pomodoro Widget */
+        .pomodoro-container {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 1rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 1000;
+            min-width: 140px;
+            border-top: 3px solid var(--primary);
+            transition: all 0.3s ease;
+        }
+
+        .pomodoro-container.break-mode {
+            border-top: 3px solid var(--success);
+        }
+
+        .pomo-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .pomo-time {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-main);
+            line-height: 1;
+        }
+
+        .pomo-controls {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 0.25rem;
+        }
+
+        .pomo-btn {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pomo-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+        
+        @media (max-width: 600px) {
+            .pomodoro-container {
+                bottom: 1rem;
+                right: 1rem;
+                padding: 0.75rem 1rem;
+                min-width: 120px;
+            }
+            .pomo-time { font-size: 1.8rem; }
+            .pomo-btn { width: 32px; height: 32px; }
+        }
+
     </style>
 </head>
 <body>
@@ -446,6 +617,17 @@
     </button>
 
     <div id="homeMode" class="home-grid">
+
+        <!-- Search Bar -->
+        <div style="grid-column: 1 / -1; margin-bottom: 1.5rem;">
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input" placeholder="Soru veya kavram ara... (Örn: Lozan, Sancağa Çıkma)" onkeypress="handleSearch(event)">
+                <button class="search-btn" onclick="executeSearch()" title="Ara">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </button>
+            </div>
+        </div>
+
         <button class="category-btn" style="border-left: 6px solid #3b82f6;" onclick="startCategory('islamiyet_oncesi')">
             İslamiyet Öncesi
             <span class="cat-subtitle" id="count_islamiyet_oncesi">Tarih Bilgi Kartları</span>
@@ -469,6 +651,19 @@
         <button class="category-btn" style="border-left: 6px solid #ec4899;" onclick="startCategory('karisik')">
             Karışık Çözüm
             <span class="cat-subtitle" id="count_karisik">Tüm Kategoriler</span>
+        </button>
+        
+
+        <button class="category-btn" style="background: linear-gradient(145deg, #b91c1c, #7f1d1d); border-left: 6px solid #ef4444; grid-column: 1 / -1; margin-bottom: 0rem;" onclick="startCategory('yeni_nesil_zor')">
+            PİKOS Özel (ZOR) - Çıkıyor Seçmece
+            <span class="cat-subtitle" id="count_yeni_nesil_zor" style="color: #fca5a5;">Sınav Kazandıran Detaylar</span>
+        </button>
+        <div style="grid-column: 1 / -1; margin-top: 1rem; margin-bottom: 0.5rem;">
+            <h3 style="color: var(--text-muted); font-weight: 500; font-size: 1.1rem; border-bottom: 1px solid var(--card-border); padding-bottom: 0.5rem;">Özel Alan</h3>
+        </div>
+        <button class="category-btn" style="background: linear-gradient(145deg, rgba(251, 191, 36, 0.15), rgba(30, 41, 59, 0.7)); border-left: 6px solid #fbbf24;" onclick="startCategory('favoriler')">
+            Favorilerim / Yıldızladıklarım
+            <span class="cat-subtitle" id="count_favoriler">Yükleniyor...</span>
         </button>
         
         <div style="grid-column: 1 / -1; margin-top: 1rem;">
@@ -515,10 +710,12 @@
                 <option value="cikmis_cagdas">Çıkmış Sorular: Çağdaş</option>
             </optgroup>
             <optgroup label="Yeni Eklenenler">
+                <option value="yeni_nesil_zor">PİKOS Özel: Çıkıyor Seçmece Zor Sorular</option>
                 
             </optgroup>
             <optgroup label="Genel Deneme">
                 <option value="karisik">Karışık Çözüm (Tüm Sorular)</option>
+            <option value="arama_sonuclari" style="display:none;">Arama Sonuçları</option>
             </optgroup>
         </select>
     </div>
@@ -528,6 +725,9 @@
             <!-- Front -->
             <div class="card-face card-front">
                 <div class="card-label">Soru</div>
+                <button class="star-btn" onclick="toggleFavorite(event)" title="Favorilere Ekle/Çıkar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </button>
                 <div class="card-content" id="cardQuestion">Yükleniyor...</div>
                 <div class="card-hint">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -539,6 +739,9 @@
             <!-- Back -->
             <div class="card-face card-back">
                 <div class="card-label" style="color: var(--primary);">Cevap</div>
+                <button class="star-btn" onclick="toggleFavorite(event)" title="Favorilere Ekle/Çıkar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                </button>
                 <div class="card-content" id="cardAnswer">Yükleniyor...</div>
             </div>
         </div>
@@ -547,6 +750,11 @@
     <div class="navigation">
         <button class="btn" style="background-color: #8b5cf6; color: white; border: none; padding: 0.75rem 1rem;" onclick="shuffleCurrentQuestions()" title="Soruları Karıştır">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
+        </button>
+
+        <button class="btn" style="background-color: #ef4444; color: white; border: none; padding: 0.75rem 1rem;" onclick="markAsWrong()" title="8 kart sonra tekrar göster">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            Bilemedim
         </button>
         <button class="btn" onclick="prevCard()">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
@@ -576,7 +784,233 @@
     <script>
         // Data Extracted from 1.pdf, 2.pdf, 3.pdf, 4.pdf
         const flashcardsData = {
+    "yeni_nesil_zor": [
+        {
+            "q": "Çin imparatoruna yazdığı mektupta \"Size bağlı kalacak, haraç verecek, kıymetli atlar hediye edeceğim. Fakat dilimizi değiştiremem, uzun saçlarımızı kestiremem, halkıma Çin elbiseleri giydiremem\" diyerek millî benliği koruma vurgusu yapan Köktürk hakanı kimdir?",
+            "a": "İşbara Kağan<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> İşbara Kağan, Çin baskısının en yoğun olduğu dönemde siyasi tavizler vermiş ancak kültürel asimilasyonu (Çinlileşmeyi) kesin bir dille reddetmiştir. Bu durum ilk Türk devletlerindeki millî benlik şuurunu kanıtlar.</span>"
+        },
+        {
+            "q": "Çinli elçinin toprak talebini \"Burası atalarımın toprağıdır, vermeye cesaretim yok\" diyerek reddeden, toprak bütünlüğünü devletin temeli sayan Asya Hun Devleti hükümdarı kimdir?",
+            "a": "Mete Han<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Mete Han, Tunguzların çorak bir toprak parçasını istemesi üzerine Kurultay'ın 'verelim' demesine şiddetle karşı çıkmış ve vatan sevgisini, toprağın devletin temeli olduğunu vurgulayan ilk Türk lideri olmuştur.</span>"
+        },
+        {
+            "q": "452 yılında Roma önlerine kadar gelen, Papa I. Leo'nun kendisine yalvarması üzerine Roma'yı işgal etmekten vazgeçen, Avrupa'da \"Tanrının Kırbacı\" olarak bilinen Türk hükümdarı kimdir?",
+            "a": "Attila (Avrupa Hun Devleti)<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Attila, Batı Roma İmparatorluğu'na diz çöktürmüş, Papa'nın ricacı olması, Sasani tehlikesi ve ordusunda salgın hastalık başlaması gibi sebeplerle Roma'yı işgal etmekten son anda vazgeçmiştir.</span>"
+        },
+        {
+            "q": "Ordusuna ücretli asker alan ilk Türk devleti olan, İbn Havkal'ın seyahatnamesinde başkentinde Müslüman, Hristiyan ve Şamanistler için ayrı hâkimlerden oluşan bir mahkeme bulunduğunu belirttiği devlet hangisidir?",
+            "a": "Hazarlar<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Hazarlar, 'Hazar Barış Çağı' (Pax Khazarica) olarak adlandırılan dönemde farklı dinlere karşı muazzam bir hoşgörü göstermiş, adalet sistemini inançlara göre ayırmıştır. Türk tarihinde paralı asker bulunduran nadir devletlerdendir.</span>"
+        },
+        {
+            "q": "İbn Batuta'nın seyahatnamesinde \"Kamaruddin denilen kayısı türü yetiştirilir... Sultan Alâüddin Rûmî'nin (I. Keykubad) eseridir.\" şeklinde bahsettiği, Anadolu Selçuklu Devleti'nin kışlık başkenti olan liman şehri neresidir?",
+            "a": "Alanya (Alaiye)<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Alaeddin Keykubad, Antalya'nın fethinden sonra Alanya'yı (kendi adını vermiştir) fethetmiş, burayı bir tersane üssü ve kışlık başkent yaparak Anadolu Selçuklu'nun Akdeniz'deki denizcilik faaliyetlerini zirveye taşımıştır.</span>"
+        },
+        {
+            "q": "Wilhelm Thomsen'in 1896'da yayımladığı \"Muhammed dünyasının soluğunun henüz ulaşmadığı Türk dili ve edebiyatının en eski anıtları\" olarak tanımladığı kitabeler hangileridir?",
+            "a": "Orhun Kitabeleri (Göktürk Yazıtları)<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Danimarkalı dilbilimci Wilhelm Thomsen tarafından okunan (ilk okunan kelime 'Tengri'dir) bu yazıtlar, Türklerin İslamiyet'ten önceki kültürel, siyasi ve edebi hayatını yansıtan en önemli ilk yazılı kaynaklardır.</span>"
+        },
+        {
+            "q": "1536 ittifakı sürecinde Kanuni Sultan Süleyman'ın Fransa Kralı'na yazdığı mektupta kendini 'sultanlar sultanı', onu ise sadece 'vilayet kralı' olarak nitelendirmesi, Osmanlı'nın hangi alandaki gücünü gösterir?",
+            "a": "Siyasi, Diplomatik ve Cihan Hâkimiyeti<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Kanuni, Fransa Kralı I. Fransuva'yı kendisine eşit görmemiş, Osmanlı sadrazamına denk saymıştır. Bu durum Osmanlı'nın 16. yüzyılda dünya siyasetinde ulaştığı ezici diplomatik üstünlüğün (Mütekabiliyetin olmamasının) kanıtıdır.</span>"
+        },
+        {
+            "q": "XVII. yüzyıl Osmanlı tarihinde ilk kez bir yıl sonraki tahminî bütçeyi (Modern Bütçe) hesaplayarak gelir-gider dengesini sağlamaya çalışan sadrazam kimdir?",
+            "a": "Tarhuncu Ahmet Paşa<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Tarhuncu Ahmet Paşa, saray masraflarını kısmış ve lüzumsuz harcamaları keserek modern anlamda ilk denk bütçeyi hazırlamıştır. Ancak menfaatleri zedelenen saray ağaları ve devlet adamlarının iftiralarıyla idam edilmiştir.</span>"
+        },
+        {
+            "q": "I. TBMM'nin otoritesini artırmak ve isyanları hızlıca bastırmak amacıyla çıkardığı, yargılama yetkisini İstiklal Mahkemelerine devreden 1920 tarihli yasanın adı nedir?",
+            "a": "Hıyanet-i Vataniye Kanunu<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Bu kanun, Meclis'e karşı ayaklananları 'vatan haini' saymış ve olağanüstü yetkilere sahip İstiklal Mahkemeleri (milletvekillerinden oluşan) kurularak Meclis'in yargı gücünü bizzat kullanmasını (güçler birliği) sağlamıştır.</span>"
+        },
+        {
+            "q": "II. Dünya Savaşı sonrasında SSCB'nin etkisi altına giren ve komünist rejimlerin kurulduğu Doğu Bloku ülkelerine (Polonya, Romanya vb.) İngiltere Başbakanı Churchill tarafından verilen meşhur isimlendirme nedir?",
+            "a": "Demir Perde Ülkeleri<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Winston Churchill'in 1946'da yaptığı ünlü Fulton konuşmasında bahsettiği 'Demir Perde', Avrupa'yı kapitalist Batı ile komünist Doğu olarak ikiye bölen görünmez ideolojik ve siyasi sınırı ifade eder.</span>"
+        },
+        {
+            "q": "Todor Jivkov iktidarında 1980'li yıllarda Türklerin ibadethanelerinin kapatılması, isimlerinin değiştirilmesi ve Türkçe konuşmalarının yasaklanması gibi ağır asimilasyon politikaları uygulayan Balkan ülkesi hangisidir?",
+            "a": "Bulgaristan<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Bulgaristan'da uygulanan bu insanlık dışı 'Soya Dönüş' (Belene Kampı vb.) asimilasyon politikaları neticesinde, 1989 yılında yüz binlerce Türk, Bulgaristan'ı terk ederek Türkiye'ye sığınmak (zorunlu göç) zorunda kalmıştır.</span>"
+        },
+        {
+            "q": "12 Eylül 1980 askerî darbesini gerçekleştirenlerin, \"siyasal istikrarı sağlamak\" gerekçesiyle yaptıkları ilk anti-demokratik siyasi eylemler nelerdir?",
+            "a": "Parlamentonun (TBMM) feshedilmesi ve siyasi partilerin kapatılması.<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Kenan Evren liderliğindeki Milli Güvenlik Konseyi yönetime el koymuş, 1961 Anayasası'nı rafa kaldırmış ve mevcut tüm siyasi parti liderlerini (Demirel, Ecevit, Türkeş, Erbakan) sürgüne göndererek demokratik hayata ağır bir darbe vurmuştur.</span>"
+        },
+        {
+            "q": "1959'da Fidel Castro'nun iktidara gelmesinin ardından Sovyetler Birliği ile yakın ilişkiler kurması ve SSCB'nin bu ülkeye nükleer füzeler yerleştirmesiyle 1962'de patlak veren kriz nedir?",
+            "a": "Küba Füze Krizi<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> ABD'nin Türkiye'ye (İzmir) Jüpiter füzelerini yerleştirmesine misilleme olarak SSCB'nin Küba'ya nükleer füze yerleştirmesiyle dünya III. Dünya Savaşı'nın eşiğinden dönmüştür. Karşılıklı tavizlerle füzeler sökülmüştür.</span>"
+        },
+        {
+            "q": "Fatih Sultan Mehmet Dönemi'nde inşa edilen, sarayın dış bölümünü (Birun), iç kısmını (Enderun) ve padişah ailesini (Harem) kapsayan saray hangisidir?",
+            "a": "Topkapı Sarayı<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> İstanbul'un fethinden sonra inşa edilen Topkapı Sarayı, 4 asır boyunca Osmanlı'nın yönetim merkezi olmuştur. Sadece bir ikametgâh değil; Divan-ı Hümayun'un toplandığı, Enderun mektebi ile devlet adamı yetiştiren bir kampüstür.</span>"
+        },
+        {
+            "q": "Selçuklularda Divan-ı Saltanat'a bağlı maliye (İstifa), yazışma (Tuğra) ve teftiş (İşraf) divanlarının varlığı neyin göstergesidir?",
+            "a": "Bürokrasinin geliştiğinin ve kurumların oturduğunun<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Alt divanların uzmanlık alanlarına göre ayrılması (iş bölümü), devletin kurumsallaştığını, kayıt ve denetim mekanizmalarının sistemli bir bürokratik yapıya dönüştüğünü gösterir.</span>"
+        },
+        {
+            "q": "1396 Niğbolu Savaşı'nda Haçlılara karşı elde ettiği muazzam zafer dolayısıyla Abbasi Halifesi tarafından kendisine \"Sultan-ı İklim-i Rum\" unvanı verilen Osmanlı padişahı kimdir?",
+            "a": "Yıldırım Bayezid (I. Bayezid)<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Bu unvan, Yıldırım Bayezid'in Anadolu'daki hâkimiyetini ve İslam dünyasındaki saygınlığını meşrulaştırmış, Osmanlı'nın Anadolu siyasi birliğini kurmasını hızlandırmıştır.</span>"
+        },
+        {
+            "q": "Mondros Ateşkesi'nin 24. Maddesi olan \"Vilâyât-ı Sitte'de (Altı Doğu İli) karışıklık çıkarsa İtilaf Devletleri buraları işgal edebilecek\" maddesinin asıl amacı nedir?",
+            "a": "Doğu Anadolu'da bağımsız bir Ermeni Devleti kurmak.<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> İtilaf Devletleri (özellikle İngiltere), ileride doğuda yapacakları Ermenistan işgaline hukuki bir kılıf hazırlamak için bu maddeyi antlaşmaya kasten ve İngilizce metinde 'Armenian Vilayets' şeklinde sokmuşlardır.</span>"
+        },
+        {
+            "q": "Milli Mücadele Dönemi'nde \"Milli sınırlar içinde vatan bütündür\" ve \"Manda ve himaye kabul olunamaz.\" ilkeleri ilk kez hangi kongrede karara bağlanmıştır?",
+            "a": "Erzurum Kongresi<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Erzurum Kongresi, toplanış şekli bakımından bölgesel, ancak aldığı kararlar bakımından tamamen 'ulusal' bir kongredir. İlk defa ulusal sınırlardan (Misak-ı Milli'nin temeli) ve tam bağımsızlıktan ödün verilmeyeceğinden bahsedilmiştir.</span>"
+        },
+        {
+            "q": "Mustafa Kemal Paşa'nın \"Siz orada yalnız düşmanı değil, milletin makûs talihini de yendiniz.\" telgrafını çekerek İsmet Paşa'yı tebrik ettiği savaş hangisidir?",
+            "a": "II. İnönü Savaşı<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Bu zaferle birlikte halkın TBMM'ye ve düzenli orduya olan güveni tam olarak pekişmiş, İtalyanlar Anadolu'dan çekilmeye başlamış, Fransızlar ise çekilme hazırlıklarına girişmiştir. 'Makûs talih' geri çekilişin durmasını ifade eder.</span>"
+        },
+        {
+            "q": "1921'de Sakarya nehrinin doğusuna çekilmek zorunda kaldığımız Kütahya-Eskişehir Savaşları'nın ardından TBMM'nin Mustafa Kemal'e verdiği Meclis yetkileriyle donatılmış unvan nedir?",
+            "a": "Başkomutanlık (3 Ay Süreyle)<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Ordunun acil ihtiyaçlarını karşılamak ve hızlı karar alabilmek için Meclis'in yasama yetkisi Mustafa Kemal'e verilmiştir. Paşa bu yetkiyi kullanarak ilk iş 'Tekalif-i Milliye Emirleri'ni (Milli Yükümlülükler) yayımlamıştır.</span>"
+        },
+        {
+            "q": "Lozan Barış Antlaşması görüşmelerinde Türkiye delegasyonunun (İsmet Paşa) asla taviz vermediği iki \"kırmızı çizgi\" konusu nedir?",
+            "a": "1) Kapitülasyonların kaldırılması, 2) Ermeni Yurdu (Toprak) meselesi<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> TBMM heyeti Lozan'a giderken bu iki konuda kesinlikle taviz verilmemesini, gerekirse görüşmelerin kesilerek yurda dönülmesini istemiştir. Türkiye'nin tam bağımsızlığı için bu iki husus hayati önem taşıyordu.</span>"
+        },
+        {
+            "q": "1926 yılında çıkarılan Kabotaj Kanunu ile liman ve denizcilik haklarının millileştirilmesi, Atatürk'ün hangi ilkesinin doğrudan bir uygulamasıdır?",
+            "a": "Milliyetçilik<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Yabancı şirketlerin tekelinde olan deniz taşımacılığı ve liman işletmeciliğinin yalnızca Türk vatandaşlarına verilmesi, ekonomik bağımsızlığı (millî ekonomi) hedeflediği için doğrudan Milliyetçilik ilkesiyle ilgilidir.</span>"
+        },
+        {
+            "q": "1934 yılında çıkarılan ve Ağa, Hacı, Hoca, Molla, Paşa gibi unvanların resmi kullanımını yasaklayan kanun hangi Atatürk ilkesiyle ilgilidir?",
+            "a": "Halkçılık<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Bu kanun, toplumdaki ayrıcalık belirten statü sembollerini kaldırarak yasalar önünde tam eşitliği sağlamayı amaçlamıştır. Bu sebeple sınıf, zümre veya soy üstünlüğünü reddeden Halkçılık ilkesinin en net sonuçlarından biridir.</span>"
+        },
+        {
+            "q": "Mustafa Kemal Paşa'nın \"Benim gazetem\" dediği, Sivas Kongresi kararlarını halka duyurmak için çıkarılan gazetenin adı nedir?",
+            "a": "İrade-i Milliye<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Milli Mücadele aleyhine yürütülen yalan propagandaları çürütmek ve halkı doğru bilgilendirmek amacıyla kurulan bu gazete, Ankara'ya geçildikten sonra yerini 'Hâkimiyet-i Milliye' gazetesine bırakacaktır.</span>"
+        },
+        {
+            "q": "Osmanlı Devleti'nin fethettiği Balkan topraklarına Anadolu'daki Türkmenleri yerleştirerek bölgeyi kalıcı olarak Türkleştirme ve İslamlaştırma politikasına ne ad verilir?",
+            "a": "İskân Politikası<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> İskân ile hem fethedilen yerlerde kalıcılık sağlanmış hem isyan riski azaltılmış hem de Anadolu'da aralarında husumet bulunan göçebe aşiretler birbirinden ayrılarak iç barış korunmuştur. İstimalet (hoşgörü) politikasıyla birlikte yürütülmüştür.</span>"
+        },
+        {
+            "q": "İlk Türk İslam devletlerinde halife tarafından hükümdara gönderilen hilat, menşur, çetr (şemsiye) gibi sembollere genel olarak ne ad verilirdi?",
+            "a": "Hâkimiyet (Hükümdarlık) Sembolleri<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Bu semboller, Abbasi halifesi tarafından Türk hükümdarlarının otoritesini dinen meşrulaştırmak (onaylamak) için gönderilirdi. Böylece Türk hükümdarları İslam dünyasının lideri/koruyucusu konumuna gelirdi.</span>"
+        },
+        {
+            "q": "Soğuk Savaş Dönemi'nde (1947-1990) ABD'nin, Avrupa ülkelerini kalkındırmak ve komünizmin yayılmasını parayla engellemek amacıyla uyguladığı dev ekonomik yardım paketinin adı nedir?",
+            "a": "Marshall Planı<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Truman Doktrini'nin siyasi/askeri boyutunu tamamlayan Marshall Planı ile, Türkiye dâhil birçok Avrupa ülkesine maddi yardımlar yapılarak bu ülkelerin Sovyet (komünizm) tehlikesine karşı Batı Bloku'nda kalmaları sağlanmıştır.</span>"
+        },
+        {
+            "q": "Türkiye'nin Kore Savaşı'na asker göndermesinin ardından 1952 yılında resmen üye olduğu, Sovyet yayılmacılığına karşı kurulan Batı Bloku'nun askeri ve siyasi kanadı hangisidir?",
+            "a": "NATO (Kuzey Atlantik Antlaşması Örgütü)<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Sovyet Rusya'nın Türkiye'den boğazlar üzerinde hak ve doğudan toprak talep etmesi üzerine (Stalin tehdidi), Türkiye güvenliğini sağlamak için Menderes döneminde NATO'ya katılmış ve Batı ittifakının tam ortasında yer almıştır.</span>"
+        },
+        {
+            "q": "II. Dünya Savaşı sırasında 1941'de Almanya'nın Rusya'ya (SSCB) saldırmasıyla başlayan ancak ağır Rus kışı nedeniyle Alman ordusunun felaketiyle sonuçlanan askerî harekât nedir?",
+            "a": "Barbarossa Harekâtı<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Hitler'in 'Hayat Alanı' (Lebensraum) politikası doğrultusunda Rusya'nın zengin petrol ve tahıl kaynaklarına ulaşmak için başlattığı bu harekât, Stalingrad direnişi ve dondurucu kış şartları yüzünden başarısız olmuş, savaşın seyrini değiştirmiştir.</span>"
+        },
+        {
+            "q": "Osmanlı'nın gayrimüslimlerden askere gitmemeleri karşılığında aldığı vergiye 'Cizye' denir. Sadece Müslüman çiftçilerden ürün üzerinden 1/10 oranında alınan verginin adı nedir?",
+            "a": "Öşür (Aşar)<br><br><span style='color:var(--text-muted); font-size:0.9rem;'><b>Açıklama:</b> Şeri (dini) bir vergi olan Öşür, Cumhuriyet döneminde (1925'te) Atatürk tarafından köylünün üzerindeki ağır yükü hafifletmek ve tarımsal üretimi artırmak (Halkçılık ilkesi gereği) amacıyla tamamen kaldırılmıştır.</span>"
+        }
+    ],
     "islamiyet_oncesi": [
+        {
+            "q": "Avrupa Hun Devleti'nde Margus ve Anatolios antlaşmalarıyla Bizans'ı vergiye bağlayan lider kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Attila (Tanrı'nın Kırbacı)<hr><small><strong>Açıklama:</strong> Attila, I. ve II. Balkan seferleri sonucunda Bizans'ı dize getirmiş ve ödedikleri vergiyi Anatolios Antlaşması ile üç katına çıkarmıştır.</small>"
+        },
+        {
+            "q": "Dünyanın en uzun destanı olan 'Manas Destanı' ve 'Yenisey Kitabeleri' kime aittir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Kırgızlar<hr><small><strong>Açıklama:</strong> Kırgızlar, Uygur Devleti'ne son vererek Ötüken'de devlet kurmuşlar, Moğol hakimiyetine giren ilk Türk boyu olmuşlardır. Manas destanı günümüzde hala yazılmaya devam edilmektedir.</small>"
+        },
+        {
+            "q": "Oğuzlarda devlet meselelerinin görüşüldüğü meclise (kurultaya) ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Tırnek<hr><small><strong>Açıklama:</strong> Her boyun meclisi farklı isimlendirilmiştir. Oğuzlarda Tırnek, Peçeneklerde Komenton, Tuna Bulgarlarında Millet Meclisi, Hazarlarda İhtiyarlar Meclisi (Pusula Detayı).</small>"
+        },
+        {
+            "q": "İslamiyet öncesi Türk devletlerinde kurultaya (toy) katılma hakkı olan üyelerin (boy beyleri, hakan, hatun vb.) genel adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Toygun<hr><small><strong>Açıklama:</strong> Toygun, kurultay üyesi demektir. Hükümdar, hatun, vezir, boy beyleri ve yüksek dereceli memurlar toygun kabul edilir.</small>"
+        },
+        {
+            "q": "Göktürklerde, devletin sivil idaresinden sorumlu olan, kurultayda alınan kararları uygulayan ve hükümet (Ayukı) başkanlığı yapan görevli kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Aygucı (Üge)<hr><small><strong>Açıklama:</strong> Aygucı günümüzdeki Başbakan (Vezir) konumundadır. Ayukı (hükümet) teşkilatının başıdır.</small>"
+        },
+        {
+            "q": "Tarihte bilinen ilk Türk devleti olan Asya Hunları'nda ordunun 'Onlu Sistem'e göre teşkilatlandırılmasını sağlayan ve ilk düzenli orduyu kuran Türk hükümdarı kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Mete Han<hr><small><strong>Açıklama:</strong> M.Ö. 209'da Mete Han'ın tahta çıkışı ve Onlu Sistemi kurması, bugün Türk Kara Kuvvetleri'nin de kuruluş tarihi olarak kabul edilmektedir.</small>"
+        },
+        {
+            "q": "Türk tarihinin en eski destanlarından olan ve İskit (Saka) Türklerinin İranlılarla (Medler) yaptığı mücadelelerin anlatıldığı destan hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Alper Tunga Destanı<hr><small><strong>Açıklama:</strong> Bu destan İskitlere aittir. Alper Tunga, Firdevsi'nin Şehname adlı eserinde 'Afrasiyab' adıyla geçer.</small>"
+        },
+        {
+            "q": "Uygurlar döneminde kağıt para yerine kullanılan, üzerine resmi mühür vurulmuş bez veya ipek parçalarına ne ad verilirdi?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Böz (Mühürlü Bez) / Kamdu<hr><small><strong>Açıklama:</strong> Kuanpoyu (bez), Çav (kağıt para) ve Yarmak (madeni para) Uygurlar ve diğer Türk devletlerinde kullanılan para çeşitleridir.</small>"
+        },
+        {
+            "q": "Müslüman Araplarla savaşarak Orta Asya'nın İslamlaşmasını bir süre geciktiren ve kendi adına para bastıran ilk Türk Hükümdarı olan Baga Tarkan hangi devlete aittir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Türgişler<hr><small><strong>Açıklama:</strong> Türgişler (Özellikle Sulu Kağan dönemi), Emevilerle savaşarak (Haristan Savaşı) Arapların ilerleyişini durdurmuşlardır.</small>"
+        },
+        {
+            "q": "İslamiyet öncesi Türk sanatında görülen 'Hayvan Üslubu' tarzı sanatı ilk defa uygulayan ve bozkırın kuyumcuları olarak bilinen topluluk hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "İskitler (Sakalar)<hr><small><strong>Açıklama:</strong> İskitler altın, gümüş ve demir işlemeciliğinde çok ileri gittikleri için bu unvanı almışlardır.</small>"
+        },
+        {
+            "q": "Orhun Abideleri'nde Türk milletinin sosyal, ekonomik ve siyasi durumunu düzeltmek için yaptığı çalışmaları anlatan, anıtı dikilen İLK devlet adamı kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Vezir Tonyukuk<hr><small><strong>Açıklama:</strong> Tonyukuk anıtı 720 yılında dikilmiştir. Kendisi için dikilen ilk anıttır ve 'Türklerin Bismarck'ı' olarak bilinir.</small>"
+        },
+        {
+            "q": "Eski Türk inancında, ölen kişinin cennete (Uçmağ) gidebilmesi için mezarının (kurgan) etrafına hayattayken öldürdüğü düşman sayısı kadar dikilen taştan heykellere ne denir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Balbal<hr><small><strong>Açıklama:</strong> Balbal, ahiret inancının (Uçmağ/Tamu) en net göstergelerinden biridir ve ilk heykelcilik örneği sayılır.</small>"
+        },
+        {
+            "q": "Hristiyanlığı kabul eden, Karadeniz'in kuzeyinde devlet kuran ve Malazgirt Savaşı'nda Bizans ordusundan ayrılarak Büyük Selçuklu saflarına geçen Türk boyları hangileridir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Peçenekler ve Uzlar (Oğuzlar)<hr><small><strong>Açıklama:</strong> Ücretli askerlik yapan Peçenek ve Uzlar, karşılarındakilerin Türk (Selçuklu) olduğunu anlayınca taraf değiştirerek savaşın kazanılmasında rol oynamışlardır.</small>"
+        },
+        {
+            "q": "Asya Hun Devleti'nde Mete Han döneminde Çin'in vergiye bağlanmasına rağmen, Çin topraklarına yerleşilmemesinin TEMEL nedeni nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Asimile olma (Çinlileşme) korkusu.<hr><small><strong>Açıklama:</strong> Mete Han, Çin'i askeri olarak mağlup etmesine rağmen kalabalık Çin nüfusu içinde Türklerin asimile olmasını (milli benliklerini kaybetmelerini) önlemek amacıyla sadece vergi almakla yetinmiş, halkın oraya yerleşmesini yasaklamıştır.</small>"
+        },
+        {
+            "q": "Uygurların Maniheizm inancını benimsemesinin siyasi ve askeri alandaki en olumsuz sonucu nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Savaşçı özelliklerini kaybetmeleri.<hr><small><strong>Açıklama:</strong> Maniheizm dini et yemeyi ve savaşmayı yasakladığı için Uygurlar zamanla askeri özelliklerini yitirmiş, yerleşik hayata geçerek tarım ve ticarete yönelmişlerdir.</small>"
+        },
+        {
+            "q": "İslamiyet öncesi Türk devletlerinde kurultaya (toy) katılma hakkı olan boy beyleri ve devlet ileri gelenlerine ne ad verilirdi?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Toygun<hr><small><strong>Açıklama:</strong> Kurultay üyelerine 'Toygun' denir. Hakan, Hatun, boy beyleri ve ileri gelen devlet memurları birer toygundur.</small>"
+        },
+        {
+            "q": "Türk adının geçtiği ilk Türkçe metin olan Orhun Abideleri (Göktürk Kitabeleri) hangi devlet tarafından, kimlerin adına dikilmiştir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "II. Göktürk (Kutluk) Devleti / Bilge Kağan, Kültigin, Tonyukuk<hr><small><strong>Açıklama:</strong> Yolluğ Tigin tarafından yazılan bu kitabeler Türk tarihinin ve edebiyatının ilk yazılı kaynaklarıdır ve sosyal devlet anlayışından bahseder.</small>"
+        },
+        {
+            "q": "Hristiyanlığı resmi devlet dini olarak kabul eden İLK Türk devleti hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Tuna Bulgarları<hr><small><strong>Açıklama:</strong> İtil (Volga) Bulgarları İslamiyet'i kabul ederken (Almış Han dönemi), Tuna Bulgarları Boris Han döneminde Hristiyanlığı kabul etmiş ve Slavlaşarak asimile olmuşlardır.</small>"
+        },
+        {
+            "q": "İslamiyet öncesi Türklerde kağana devleti yönetme yetkisinin Gök Tengri tarafından verildiğine inanılan anlayışa ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Kut Anlayışı<hr><small><strong>Açıklama:</strong> Kut anlayışı, yönetme yetkisinin ilahi kökenli olduğuna inanılmasıdır. Kan yoluyla hanedan üyelerine geçtiği için taht kavgalarına ve devletlerin kısa sürede yıkılmasına neden olmuştur.</small>"
+        },
+        {
+            "q": "Tarihte bilinen ilk Türk devleti olan Asya Hun Devleti'nin kurucusu kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Teoman<hr><small><strong>Açıklama:</strong> Bilinen ilk teşkilatlı Türk devleti Asya (Büyük) Hun Devleti'dir ve kurucusu Teoman'dır. En parlak dönemi ise Mete Han dönemidir.</small>"
+        },
+        {
+            "q": "Kavimler Göçü'nün ardından Avrupa'da kurulan ve Balamir önderliğinde Macaristan merkezli olarak tarih sahnesine çıkan devlet hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Avrupa Hun Devleti<hr><small><strong>Açıklama:</strong> Balamir tarafından kurulan Avrupa Hunları, Uldız döneminde Anadolu'ya ilk Türk akınlarını düzenlemiş, Attila döneminde ise en parlak çağını yaşamıştır.</small>"
+        },
+        {
+            "q": "Asya Hun Devleti'nde Mete Han döneminde Çin'in vergiye bağlanmasına rağmen Çin'e yerleşilmemesinin TEMEL nedeni nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Asimile olma (Çinlileşme) korkusu.<hr><small><strong>Açıklama:</strong> Mete Han, Çin'i askeri olarak mağlup etmesine rağmen kalabalık Çin nüfusu içinde Türklerin asimile olmasını (milli benliklerini kaybetmelerini) önlemek amacıyla sadece vergi almakla yetinmiş, halkın oraya yerleşmesini yasaklamıştır. (ÖSYM sık sorar)</small>"
+        },
+        {
+            "q": "Uygurların Maniheizm inancını benimsemesinin siyasi ve askeri alandaki en olumsuz sonucu nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Savaşçı özelliklerini kaybetmeleri.<hr><small><strong>Açıklama:</strong> Maniheizm dini et yemeyi ve savaşmayı yasakladığı için Uygurlar zamanla askeri özelliklerini yitirmiş, yerleşik hayata geçerek tarım ve ticarete yönelmişlerdir.</small>"
+        },
+        {
+            "q": "İslamiyet öncesi Türk devletlerinde kurultaya (toy) katılma hakkı olan boy beyleri ve devlet ileri gelenlerine ne ad verilirdi? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Toygun<hr><small><strong>Açıklama:</strong> Kurultay üyelerine 'Toygun' denir. Hakan, Hatun, boy beyleri ve ileri gelen devlet memurları birer toygundur. Hakanın olmadığı durumlarda kurultaya Aygucı (Vezir) başkanlık eder.</small>"
+        },
+        {
+            "q": "Türk adının geçtiği ilk Türkçe metin olan Orhun Abideleri (Göktürk Kitabeleri) hangi devlet tarafından, kimlerin adına dikilmiştir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "II. Göktürk (Kutluk) Devleti / Bilge Kağan, Kültigin, Tonyukuk<hr><small><strong>Açıklama:</strong> Yolluğ Tigin tarafından yazılan bu kitabeler Türk tarihinin ve edebiyatının ilk yazılı kaynaklarıdır ve sosyal devlet anlayışından bahseder.</small>"
+        },
+        {
+            "q": "Hristiyanlığı resmi devlet dini olarak kabul eden İLK Türk devleti hangisidir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Tuna Bulgarları<hr><small><strong>Açıklama:</strong> İtil (Volga) Bulgarları İslamiyet'i kabul ederken (Almış Han dönemi), Tuna Bulgarları Boris Han döneminde Hristiyanlığı kabul etmiş ve Slavlaşarak asimile olmuşlardır.</small>"
+        },
         {
             "q": "Göktürklerin (I. Göktürk) siyasi ve sosyal tarihini anlatan, ancak dili Sogdça (ve Brahmi) olan, Türk tarihinin bilinen ilk yazıtı kabul edilen eser hangisidir?",
             "a": "Bugut Yazıtı<hr><small><strong>Açıklama:</strong> I. Göktürk devleti zamanında (Taspar/Tapo Kağan dönemine ait) dikilmiştir. Sogdça yazılmış olması Türklerin diplomatik ve ticari dilde Sogdları kullandığını gösterir.</small>"
@@ -823,6 +1257,122 @@
         }
     ],
     "ilk_turk_islam": [
+        {
+            "q": "Anadolu Selçuklu Devleti'nde toprak (ikta) kayıtlarını tutan ve dağıtımını yapan divan hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Divan-ı Pervane<hr><small><strong>Açıklama:</strong> Büyük Selçuklu'da olmayan, Anadolu Selçuklu'ya has bir divandır. Başındaki görevliye 'Pervaneci' denir ve çok yetkilidir (Örn: Muineddin Süleyman Pervane).</small>"
+        },
+        {
+            "q": "Karahanlılar döneminde yazılan, tasavvufi nitelik taşıyan ve Hoca Ahmet Yesevi'ye ait olan eser hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Divan-ı Hikmet<hr><small><strong>Açıklama:</strong> Türk tasavvuf tarihinin İLK yazılı eseridir. Ahmet Yesevi 'Piri Türkistan' olarak bilinir ve Anadolu'nun İslamlaşmasında (Alperenler) büyük rolü vardır.</small>"
+        },
+        {
+            "q": "Mısır'da kurulan ve 'Kutsal topraklara (Hicaz)' egemen olan İLK Türk devleti hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Akşitler (İhşidiler)<hr><small><strong>Açıklama:</strong> Tolunoğulları Mısır'da kurulan ilk Türk devletidir ancak Mekke-Medine (Hicaz) bölgesine egemen olan İLK Türk devleti Akşitler'dir. (Kurucusu Muhammed bin Toğaç'tır).</small>"
+        },
+        {
+            "q": "Selahaddin Eyyubi'nin Haçlıları mağlup ederek Kudüs'ü geri aldığı ve III. Haçlı Seferi'ne neden olan savaş nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "1187 Hıttin Savaşı<hr><small><strong>Açıklama:</strong> Selahaddin Eyyubi 'Kudüs Fatihi' (Şarkın en sevgili sultanı) olarak bilinir. Kudüs'ün Haçlılardan alınması üzerine Avrupa'da krallar 3. Haçlı Seferini düzenlemiştir.</small>"
+        },
+        {
+            "q": "Büyük Selçuklu Devleti'ni yıkılış sürecine sokan ve Sultan Sencer'in Karahitaylara esir düştüğü savaş hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "1141 Katvan Savaşı<hr><small><strong>Açıklama:</strong> Karahitay (Moğol) ordusuna karşı alınan bu ağır yenilgi ile devlet dağılma sürecine girmiş, Sultan Sencer'in Oğuz isyanında esir düşüp ölmesiyle devlet resmen yıkılmıştır.</small>"
+        },
+        {
+            "q": "Moğolların (Cengiz Han), Harzemşahlar Devleti'ne saldırarak tarihe 'Otrar Faciası' olarak geçen büyük katliamı yapmalarına neden olan gelişme (vali) kimdir/nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Otrar Valisi İnalcık'ın Moğol ticaret kervanını yağmalatıp elçileri öldürtmesi.<hr><small><strong>Açıklama:</strong> Bu olay üzerine Cengiz Han, Harzemşahların üzerine yürüyerek büyük bir yıkım (Otrar Faciası) gerçekleştirmiş, kütüphaneleri ve şehirleri yakıp yıkmıştır. Bu durum Moğolların batıya ilerleyişini hızlandırmıştır.</small>"
+        },
+        {
+            "q": "Büyük Selçuklu Devleti saray teşkilatında, sultanın elbiselerinden sorumlu olan ve giyim kuşamını düzenleyen görevliye ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Camedar<hr><small><strong>Açıklama:</strong> Came = Elbise demektir. (Şifre: Camdan bakan elbiseli adam). Diğer önemli saray görevlileri: Emir-i Candar (Saray koruması), Alemdar (Bayraktar), Çeşnigir (Aşçıbaşı), Hansalar (Aşçı).</small>"
+        },
+        {
+            "q": "Büyük Selçuklu Devleti'nde askeri işlerden sorumlu olan ve ordunun ihtiyaçlarını (silah, teçhizat) karşılayan divan hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Divan-ı Arz (Emir-i Arz)<hr><small><strong>Açıklama:</strong> Divan-ı Arz, savunma bakanlığı görevindedir. Başındaki görevliye Emir-i Arz (Arzü'l Ceyş) denir.</small>"
+        },
+        {
+            "q": "Anadolu Selçuklu Devleti'nde, Moğol (İlhanlı) tehlikesine karşı sınırları korumakla görevli uç beylerinin oluşturduğu teşkilata ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Uç Beyliği (Uç Teşkilatı)<hr><small><strong>Açıklama:</strong> Uç beyleri, Bizans ve Moğol sınırlarında hem gaza yapmış hem de sınırı korumuştur. Osmanlı devleti de bir uç beyliği olarak kurulmuştur.</small>"
+        },
+        {
+            "q": "Tolunoğulları ve İhşidiler (Akşitler) Mısır'da kurulan ilk Türk-İslam devletleridir. Bu iki devletin kısa sürede yıkılmasının TEMEL nedeni nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Yöneticilerinin Türk, halkının Arap olması.<hr><small><strong>Açıklama:</strong> Halk ile yönetici arasındaki bu etnik ve kültürel kopukluk, devletlerin uzun ömürlü olmasını engellemiş ve isyanlara zemin hazırlamıştır.</small>"
+        },
+        {
+            "q": "Karahanlılar döneminde Kaşgarlı Mahmut tarafından yazılan, Araplara Türkçe öğretmek ve Türkçenin zenginliğini göstermek amacıyla hazırlanan ansiklopedik sözlük hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Divan-ı Lügati't Türk<hr><small><strong>Açıklama:</strong> İlk Türkçe sözlük olan eser aynı zamanda ilk Türk dünya haritasını da içerir. Abbasi Halifesi El-Muktedi Billah'a sunulmuştur.</small>"
+        },
+        {
+            "q": "Büyük Selçuklu Devleti'nin en parlak dönemi olan Sultan Melikşah zamanında, Hasan Sabbah önderliğinde kurulan ve devletin yıkılmasında etkili olan terör (suikast) örgütü hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Batınilik (Haşhaşiler)<hr><small><strong>Açıklama:</strong> Alamut kalesini merkez edinen bu tarikat, Vezir Nizamülmülk dahil birçok önemli devlet adamına suikast düzenleyerek devleti zayıflatmıştır.</small>"
+        },
+        {
+            "q": "Selçuklularda 'Atabeylik' sisteminin en önemli SİYASİ olumsuzluğu (zararı) nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Merkezi otoritenin zayıflaması ve bağımsızlıklarını ilan etmeleri.<hr><small><strong>Açıklama:</strong> Şehzadeleri eğitmekle görevli olan Atabeyler, devletin zayıfladığı anlarda ellerindeki askeri gücü kullanarak kendi bağımsız devletlerini (Zengiler, İldenizliler vb.) kurmuşlardır.</small>"
+        },
+        {
+            "q": "İlk Türk-İslam devletlerinde şeri davalara kadılar bakarken, siyasi, örfi ve devlete karşı işlenen büyük suçlara bakan yüksek mahkeme (divan) hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Divan-ı Mezalim<hr><small><strong>Açıklama:</strong> Sultanın bizzat başkanlık ettiği bu mahkeme, günümüzdeki Anayasa Mahkemesi veya Yargıtay işlevi görüyordu. Ağır siyasi suçlular burada yargılanırdı.</small>"
+        },
+        {
+            "q": "Anadolu Selçuklu Devleti'nin yıkılış sürecine girmesine ve Anadolu'nun Moğol (İlhanlı) tahakkümü altına girmesine neden olan savaş hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "1243 Kösedağ Savaşı<hr><small><strong>Açıklama:</strong> Bu mağlubiyetten sonra Anadolu Selçuklu devleti dağılma sürecine girmiş, Anadolu'da İkinci Beylikler dönemi başlamıştır.</small>"
+        },
+        {
+            "q": "Gazneli Mahmut döneminde, Abbasi halifesi Şii Büveyhoğulları'nın baskısından kurtarıldığı için halife tarafından Gazneli Mahmut'a hangi unvan verilmiştir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Sultan (Sultan-ı Azam)<hr><small><strong>Açıklama:</strong> Türk tarihinde İslam dünyasının siyasi liderliğini koruyan ve 'Sultan' unvanını kullanan ilk Türk hükümdarı Gazneli Mahmut'tur.</small>"
+        },
+        {
+            "q": "Mısır'da kurulan ve Haçlı Seferlerine (Hıttin Savaşı) karşı Kudüs'ü geri alarak büyük bir başarı kazanan, Selahaddin Eyyubi tarafından kurulan Türk-İslam devleti hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Eyyubiler<hr><small><strong>Açıklama:</strong> 1187 Hıttin Savaşı ile Kudüs Haçlılardan geri alınmış, bu olay III. Haçlı Seferi'nin başlamasına neden olmuştur.</small>"
+        },
+        {
+            "q": "Türk-İslam sentezinin ilk eseri sayılan, Yusuf Has Hacip tarafından yazılıp Karahanlı hükümdarı Tabgaç Buğra Han'a sunulan eser hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Kutadgu Bilig (Mutluluk Veren Bilgi)<hr><small><strong>Açıklama:</strong> İdeal devlet yönetimini anlatan siyasetname özelliğindeki ilk Türk-İslam edebi eseridir.</small>"
+        },
+        {
+            "q": "Büyük Selçuklu Devleti'nde devlet işlerinin görüşülüp karara bağlandığı en büyük divan olan 'Divan-ı Saltanat'ın başkanı kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Vezir (Sahib-i Divan)<hr><small><strong>Açıklama:</strong> Karahanlılarda Meclis-i Ali, Selçuklularda Divan-ı Saltanat adını alan büyük divana vezir başkanlık eder ve sultandan sonraki en yetkili kişidir.</small>"
+        },
+        {
+            "q": "1048 Pasinler Savaşı'nın Türk tarihi açısından en önemli özelliği nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Büyük Selçuklular ile Bizans arasındaki İLK büyük savaştır.<hr><small><strong>Açıklama:</strong> Gürcü ve Bizans birleşik ordularına karşı kazanılan bu savaş, Anadolu'nun fethi için atılan ilk büyük ve resmi adımdır.</small>"
+        },
+        {
+            "q": "Gazneliler döneminde yaşayan, Hindistan seferlerine katılan ve Gazneli Mahmut'un 'Sarayımın en değerli hazinesi' dediği büyük bilgin kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Biruni<hr><small><strong>Açıklama:</strong> Astronomi, matematik ve coğrafya alanındaki çalışmalarıyla tanınan Biruni, Asar'ül Bakiye adlı eserin yazarıdır.</small>"
+        },
+        {
+            "q": "Anadolu Selçuklu Devleti'nde ticareti geliştirmek için kervansaraylar dışında tüccarların zararını karşılamak amacıyla dünyada ilk kez kurulan sistem nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Devlet Sigortacılığı Sistemi<hr><small><strong>Açıklama:</strong> Anadolu Selçukluları, ticareti canlandırmak için dünyada ilk sayılabilecek devlet destekli sigorta sistemini kurmuş ve gümrük vergilerini indirmişlerdir.</small>"
+        },
+        {
+            "q": "Tarihte ilk defa sultan unvanını kullanan Türk hükümdarı kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Gazneli Mahmut<hr><small><strong>Açıklama:</strong> Abbasi halifesini Şii Büveyhoğullarının baskısından kurtardığı için kendisine 'Sultan' (Sultan-ı Azam) unvanı verilmiştir.</small>"
+        },
+        {
+            "q": "Büyük Selçuklu Devleti'nin yıkılış sürecine girmesine neden olan ve Sultan Sencer'in esir düştüğü 1141 tarihli savaş hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Katvan Savaşı<hr><small><strong>Açıklama:</strong> Karahitaylar ile yapılan Katvan Savaşı'nın kaybedilmesi Büyük Selçuklu Devleti'nin yıkılış sürecini başlatmıştır.</small>"
+        },
+        {
+            "q": "Türk-İslam sentezinin ilk eseri sayılan, Yusuf Has Hacip tarafından yazılıp Karahanlı hükümdarı Tabgaç Buğra Han'a sunulan eser hangisidir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Kutadgu Bilig (Mutluluk Veren Bilgi)<hr><small><strong>Açıklama:</strong> İdeal devlet yönetimini anlatan siyasetname özelliğindeki ilk Türk-İslam edebi eseridir.</small>"
+        },
+        {
+            "q": "Büyük Selçuklu Devleti'nde devlet işlerinin görüşülüp karara bağlandığı en büyük divan olan 'Divan-ı Saltanat'ın (Büyük Divan) başkanı kimdir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Vezir (Sahib-i Divan)<hr><small><strong>Açıklama:</strong> Karahanlılarda Meclis-i Ali, Selçuklularda Divan-ı Saltanat adını alan büyük divana vezir başkanlık eder ve sultandan sonraki en yetkili kişidir.</small>"
+        },
+        {
+            "q": "1048 Pasinler Savaşı'nın Türk tarihi açısından en önemli özelliği nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Büyük Selçuklular ile Bizans arasındaki İLK büyük savaştır.<hr><small><strong>Açıklama:</strong> Gürcü ve Bizans birleşik ordularına karşı kazanılan bu savaş, Anadolu'nun fethi için atılan ilk büyük ve resmi adımdır.</small>"
+        },
+        {
+            "q": "Gazneliler döneminde yaşayan, Hindistan seferlerine katılan ve Gazneli Mahmut'un 'Sarayımın en değerli hazinesi' dediği büyük bilgin kimdir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Biruni<hr><small><strong>Açıklama:</strong> Astronomi, matematik ve coğrafya alanındaki çalışmalarıyla tanınan Biruni, Asar'ül Bakiye adlı eserin yazarıdır.</small>"
+        },
+        {
+            "q": "Anadolu Selçuklu Devleti'nde ticareti geliştirmek için kervansaraylar dışında tüccarların zararını karşılamak amacıyla kurulan sistem nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Devlet Sigortacılığı Sistemi<hr><small><strong>Açıklama:</strong> Anadolu Selçukluları, ticareti canlandırmak için dünyada ilk sayılabilecek devlet destekli sigorta sistemini kurmuş ve gümrük vergilerini indirmişlerdir.</small>"
+        },
         {
             "q": "Büyük Selçuklu Devleti'nde meliklerin (şehzadelerin) eğitimiyle ilgilenen ve onlarla birlikte eyaletlere gönderilen devlet adamlarına (Osmanlı'daki lala karşılığı) ne ad verilirdi?",
             "a": "Atabey<hr><small><strong>Açıklama:</strong> Atabeylik sistemi, Selçuklularda devlet tecrübesi kazandırmak içindir. Ancak merkezi otorite zayıflayınca atabeyler kendi bağımsız devletlerini (İldenizliler, Zengiler vb.) kurmuşlardır.</small>"
@@ -1073,6 +1623,134 @@
         }
     ],
     "osmanli": [
+        {
+            "q": "Osmanlı Devleti'nde kendi isteğiyle tahttan çekilen İLK ve TEK padişah kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "II. Murat<hr><small><strong>Açıklama:</strong> Haçlılarla yapılan Edirne-Segedin Antlaşması (1444) sonrası tahtı 12 yaşındaki oğlu II. Mehmet'e (Fatih) bırakmış ancak Haçlıların antlaşmayı bozması üzerine tekrar tahta geçmiştir (Varna Savaşı).</small>"
+        },
+        {
+            "q": "Fatih Sultan Mehmet'in 'Benim ve memleketimin hocasıdır' dediği, fethin manevi mimarı kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Akşemseddin<hr><small><strong>Açıklama:</strong> Mikrobun varlığını (Maddet-ül Hayat adlı eserinde) Pasteur'den yüzyıllar önce keşfeden, tasavvuf ve tıp alimi olan ünlü hocadır.</small>"
+        },
+        {
+            "q": "III. Selim döneminde Avrupa tarzında kurulan 'Nizam-ı Cedit' ordusunun ihtiyaçlarını karşılamak için oluşturulan hazinenin adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "İrad-ı Cedit Hazinesi<hr><small><strong>Açıklama:</strong> Nizam-ı Cedit (Yeni Düzen) sadece ordunun değil, o dönemki tüm yeniliklerin genel adıdır. Bu ordu ilk ve tek başarısını Napolyon'a karşı Akka Kalesi'nde (Cezzar Ahmet Paşa komutasında) almıştır.</small>"
+        },
+        {
+            "q": "II. Mahmut döneminde, padişahın mutlak yetkilerini İLK KEZ kısıtlayan ve ayanlarla imzalanan belge hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Sened-i İttifak (1808)<hr><small><strong>Açıklama:</strong> Alemdar Mustafa Paşa'nın sadrazamlığı döneminde imzalanan bu belge ile Osmanlı'da ilk kez demokratikleşme hareketi başlamış (anayasacılığa ilk adım), padişah kendi gücünün yanında başka bir gücü tanımıştır.</small>"
+        },
+        {
+            "q": "Kırım'ın Rusya'ya ait olduğunun resmen kabul edildiği ve 'Dağılma Dönemi'ni başlatan antlaşma hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "1792 Yaş Antlaşması<hr><small><strong>Açıklama:</strong> Sıralama: Küçük Kaynarca ile Kırım bağımsız oldu -> Aynalıkavak Tenkihnamesi ile Şahin Giray atandı -> Yaş Antlaşması ile Rusya'ya ait olduğu kesinleşti. (K-A-Y şifresi)</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nin Kuzey Afrika'da kaybettiği SON toprak parçası neresidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Trablusgarp (1912 Uşi Antlaşması ile)<hr><small><strong>Açıklama:</strong> İtalya'nın işgali üzerine M.Kemal (Gazeteci Şerif) ve Enver Paşa (Kuyumcu Hamdi) gizlice bölgeye gidip halkı örgütlemiş ancak Balkan Savaşları çıkınca barış yapmak zorunda kalınmıştır.</small>"
+        },
+        {
+            "q": "Osmanlı'da siyasi partilerin kurularak 'çok partili hayata' İLK KEZ geçildiği dönem hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "II. Meşrutiyet (1908 sonrası)<hr><small><strong>Açıklama:</strong> İttihat ve Terakki Fırkası, Hürriyet ve İtilaf Fırkası, Ahrar Fırkası gibi partilerle Türk tarihinde İLK DEFA çok partili siyasi hayata geçilmiştir (1909 anayasa değişiklikleriyle).</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde Mısır Sorunu'nun (Kavalalı Mehmet Ali Paşa) çözümü için toplanan 1840 Londra Konferansı'nda Avrupalı devletlerin desteğini almak (diplomatik üstünlük sağlamak) amacıyla aynı yıl apar topar ilan edilen ferman hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Tanzimat Fermanı (1839/1840)<hr><small><strong>Açıklama:</strong> Mustafa Reşit Paşa tarafından ilan edilen Gülhane Hatt-ı Hümayunu (Tanzimat Fermanı), Londra Konferansı'nda Mısır sorununun Osmanlı lehine çözülmesinde (iç işlerimize karışılmasını önlemek amacıyla) büyük rol oynamıştır.</small>"
+        },
+        {
+            "q": "19. yüzyılda (1830) Osmanlı Devleti'nin 'Kuzey Afrika'da kaybettiği İLK toprak parçası' neresidir ve hangi devlet tarafından işgal edilmiştir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Cezayir - Fransa tarafından<hr><small><strong>Açıklama:</strong> Kuzey Afrika'da kaybedilen İLK toprak Cezayir (1830 - Fransa), SON toprak parçası ise Trablusgarp'tır (1912 - İtalya / Uşi Antlaşması). (Pusula Detayı!)</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde Kapıkulu askerlerinin üç ayda bir aldıkları maaşa 'Ulufe' denir. Padişah değişikliklerinde aldıkları bahşişe ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Cülus Bahşişi<hr><small><strong>Açıklama:</strong> İlk kez Yıldırım Bayezid döneminde verilen Cülus bahşişi, Fatih Kanunnamesi ile yasal hale gelmiş, I. Abdülhamit döneminde ise kaldırılmıştır.</small>"
+        },
+        {
+            "q": "Osmanlı eğitim sisteminde, medrese mezunlarının tayin bekledikleri (staj) döneme ne ad verilirdi?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Mülazemet Sistemi<hr><small><strong>Açıklama:</strong> Atama sırası bekleyen (stajyer) müderris ve kadılara mülazım, bu bekleme sürecine ise mülazemet denirdi.</small>"
+        },
+        {
+            "q": "Osmanlı toprak sisteminde 'Mukataa' topraklarının gelirleri açık artırma usulüyle peşin olarak şahıslara verilirdi. Bu sisteme ve bu sistemi kiralayan kişiye ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "İltizam Sistemi / Mültezim<hr><small><strong>Açıklama:</strong> İltizam sistemi sayesinde devletin hazinesine (Miri Hazine) nakit ve sıcak para akışı sağlanırdı. Sistem zamanla yozlaşmış ve mültezimler yerel derebeylerine (ayan) dönüşmüştür.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde, Divan-ı Hümayun'da alınan kararların şeriata (İslam hukukuna) uygun olup olmadığına dair fetva verme yetkisi kime aittir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Şeyhülislam (Müfti)<hr><small><strong>Açıklama:</strong> Şeyhülislam, İlmiye sınıfının en üst yöneticisidir. Divan üyesi olmamasına rağmen, gerektiğinde karar sürecinde danışmanlık yapardı.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti, 17. yüzyılda doğuda (İran ile) ulaştığı en geniş sınırları hangi antlaşma ile sağlamıştır?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "1590 Ferhat Paşa Antlaşması<hr><small><strong>Açıklama:</strong> Doğuda en geniş sınırlara Ferhat Paşa ile ulaşılırken, batıda (Lehistan) en geniş sınırlara 1672 Bucaş Antlaşması ile ulaşılmıştır.</small>"
+        },
+        {
+            "q": "Osmanlı denizcilik tarihinde, Osmanlı donanmasının İLK KEZ yakıldığı yer ve olay hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "İnebahtı Deniz Savaşı (1571)<hr><small><strong>Açıklama:</strong> Kıbrıs'ın fethine karşılık olarak Haçlı donanması tarafından İnebahtı'da donanma yakılmıştır. Donanmanın yakıldığı diğer yerler: Çeşme, Navarin ve Sinop'tur (İÇNS şifresi).</small>"
+        },
+        {
+            "q": "Lale Devri'nde, Avrupa'nın başkentlerine (Paris, Londra, Viyana) ilk kez geçici elçiler gönderilmesinin TEMEL amacı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Avrupa'daki gelişmeleri (teknik, diplomasi) yakından takip etmek.<hr><small><strong>Açıklama:</strong> Osmanlı bu dönemde Avrupa'nın üstünlüğünü kabul etmiş ve Yirmisekiz Çelebi Mehmet gibi elçileri (Sefaretname) gözlem yapmaları için göndermiştir.</small>"
+        },
+        {
+            "q": "1876 yılında Kanuni Esasi'nin ilan edilmesiyle başlayan Birinci Meşrutiyet döneminde, padişahın mutlak yetkilerini sınırlandıran ve halkın İLK KEZ yönetime katılmasını sağlayan organ hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Meclis-i Mebusan (Mebusan Meclisi)<hr><small><strong>Açıklama:</strong> Üyeleri halk tarafından seçilen Mebusan Meclisi ile birlikte Osmanlı halkı ilk defa padişahın yanında yönetime ortak olmuştur.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde, 19. yüzyılda ekonominin çökmesi üzerine dış borçları tahsil etmek amacıyla Avrupalı devletler tarafından kurulan teşkilatın adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Düyun-u Umumiye (Genel Borçlar İdaresi) (1881)<hr><small><strong>Açıklama:</strong> II. Abdülhamit döneminde (Muharrem Kararnamesi ile) kurulan bu idare, Osmanlı'nın ekonomik bağımsızlığını tamamen kaybetmesine neden olmuştur.</small>"
+        },
+        {
+            "q": "Osmanlı'nın I. Dünya Savaşı'nda İngilizlerin sömürge yollarını (Hindistan bağlantısını) kesmek ve Mısır'ı geri almak amacıyla açtığı TAARRUZ cephesi hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Kanal Cephesi (Süveyş Kanalı)<hr><small><strong>Açıklama:</strong> Almanya'nın isteği üzerine Cemal Paşa komutasında açılan bu taarruz cephesi, çöl şartları ve lojistik eksiklikler nedeniyle başarısızlıkla sonuçlanmıştır.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde Fatih Sultan Mehmet döneminde hazırlanan 'Kanunname-i Âli Osman' ile yasal hale getirilen uygulamalar nelerdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Müsadere, Kardeş Katli, Sancağa Çıkma, Cülus Bahşişi<hr><small><strong>Açıklama:</strong> Bu kanunname ile merkezi otoriteyi mutlaklaştırmak amaçlanmış, padişahın yetkileri kurumsallaşmıştır.</small>"
+        },
+        {
+            "q": "Osmanlı toprak sisteminde geliri doğrudan padişahın kızlarına, annelerine ve eşlerine ayrılan topraklara ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Paşmaklık Arazi<hr><small><strong>Açıklama:</strong> Miri arazi çeşitlerindendir. Diğerleri: Dirlik (maaş karşılığı), Mukataa (doğrudan hazineye), Ocaklık (kale muhafızlarına), Yurtluk (sınır boylarındaki akıncılara).</small>"
+        },
+        {
+            "q": "17. Yüzyılda (Duraklama Dönemi) maliyeyi düzeltmek için ilk kez denk bütçe (modern anlamda) hazırlayan Osmanlı devlet adamı kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Tarhuncu Ahmet Paşa<hr><small><strong>Açıklama:</strong> IV. Mehmet döneminde sadrazamlık yapmış, saray masraflarını kıstığı için çıkarları zedelenenler tarafından idam ettirilmiştir.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nin Kırım'ın Rusya'ya ait olduğunu resmen kabul ettiği ve Karadeniz'in Türk gölü olma özelliğini kesin olarak bitiren antlaşma hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "1792 Yaş Antlaşması<hr><small><strong>Açıklama:</strong> Küçük Kaynarca ile Kırım bağımsız olmuş, Aynalıkavak ile Rus yanlısı şahin Giray atanmış, Yaş Antlaşması ile Kırım'ın Rusya'ya ait olduğu kesinleşmiştir. (Dağılma dönemi başlangıcıdır)</small>"
+        },
+        {
+            "q": "II. Mahmut döneminde tımar sisteminin kaldırılmasından sonra taşrada güvenliği sağlamak amacıyla kurulan askeri teşkilat nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Redif Birlikleri<hr><small><strong>Açıklama:</strong> Eyaletlerdeki güvenlik boşluğunu doldurmak için kurulan Redif Birlikleri ve köylerde Muhtarlık teşkilatı, II. Mahmut'un merkezi otoriteyi sağlama çabalarıdır.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde devşirme sisteminin uygulandığı, Hristiyan çocuklarının yeteneklerine göre saray hizmetleri veya Kapıkulu Ocakları için yetiştirildiği saray okulu hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Enderun Mektebi<hr><small><strong>Açıklama:</strong> II. Murat döneminde kurulan Enderun, Osmanlı'nın üst düzey sivil ve askeri bürokrat (sadrazam, vezir, beylerbeyi) yetiştiren temel eğitim kurumuydu.</small>"
+        },
+        {
+            "q": "Osmanlı tarihinde ilk kez bir padişahın kendi gücü dışında başka bir gücü (ayanların gücünü) tanıdığı 1808 tarihli belge nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Sened-i İttifak<hr><small><strong>Açıklama:</strong> II. Mahmut ile ayanlar arasında imzalanan bu belge, padişahın yetkilerini sınırlandıran İLK belgedir (Demokratikleşme yolundaki ilk adımdır ancak anayasal bir belge değildir).</small>"
+        },
+        {
+            "q": "1839 Tanzimat Fermanı'nın ilan edilmesinde etkili olan ve fermanı Gülhane Parkı'nda okuyan dönemin Hariciye Nazırı (Dışişleri Bakanı) kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Mustafa Reşit Paşa<hr><small><strong>Açıklama:</strong> Padişah Abdülmecit döneminde ilan edilen Tanzimat Fermanı (Gülhane Hatt-ı Hümayunu), kanun üstünlüğünü kabul eden ve herkese eşit vatandaşlık hakkı tanıyan ilk belgedir.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde Fatih Sultan Mehmet döneminde hazırlanan 'Kanunname-i Âli Osman' ile yasal hale getirilen uygulamalar nelerdir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Müsadere, Kardeş Katli, Sancağa Çıkma, Cülus Bahşişi<hr><small><strong>Açıklama:</strong> Bu kanunname ile merkezi otoriteyi mutlaklaştırmak amaçlanmış, padişahın yetkileri kurumsallaşmıştır.</small>"
+        },
+        {
+            "q": "Osmanlı toprak sisteminde geliri doğrudan padişahın kızlarına, annelerine ve eşlerine ayrılan topraklara ne ad verilir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Paşmaklık Arazi<hr><small><strong>Açıklama:</strong> Miri arazi çeşitlerindendir. Diğerleri: Dirlik (maaş karşılığı), Mukataa (doğrudan hazineye), Ocaklık (kale muhafızlarına), Yurtluk (sınır boylarındaki akıncılara).</small>"
+        },
+        {
+            "q": "17. Yüzyılda (Duraklama Dönemi) maliyeyi düzeltmek için ilk kez denk bütçe (modern anlamda) hazırlayan Osmanlı devlet adamı kimdir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Tarhuncu Ahmet Paşa<hr><small><strong>Açıklama:</strong> IV. Mehmet döneminde sadrazamlık yapmış, saray masraflarını kıstığı için çıkarları zedelenenler tarafından idam ettirilmiştir.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nin Kırım'ın Rusya'ya ait olduğunu resmen kabul ettiği ve Karadeniz'in Türk gölü olma özelliğini kesin olarak bitiren antlaşma hangisidir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "1792 Yaş Antlaşması<hr><small><strong>Açıklama:</strong> Küçük Kaynarca ile Kırım bağımsız olmuş, Aynalıkavak ile Rus yanlısı şahin Giray atanmış, Yaş Antlaşması ile Kırım'ın Rusya'ya ait olduğu kesinleşmiştir. (Dağılma dönemi başlangıcıdır)</small>"
+        },
+        {
+            "q": "II. Mahmut döneminde tımar sisteminin kaldırılmasından sonra taşrada güvenliği sağlamak amacıyla kurulan askeri teşkilat nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Redif Birlikleri<hr><small><strong>Açıklama:</strong> Eyaletlerdeki güvenlik boşluğunu doldurmak için kurulan Redif Birlikleri ve köylerde Muhtarlık teşkilatı, II. Mahmut'un merkezi otoriteyi sağlama çabalarıdır.</small>"
+        },
         {
             "q": "Osmanlı Devleti'nde devlet görevlilerinin (vezir, paşa) haksız yollarla elde ettikleri mallara veya ölümleri sonrasında servetlerine devlet tarafından el konulması sistemine ne ad verilir?",
             "a": "Müsadere Usulü<hr><small><strong>Açıklama:</strong> Fatih döneminde Çandarlı Halil Paşa'ya uygulanarak yasallaşan bu sistem, özel mülkiyetin gelişimini engellemiş ancak merkezi otoriteyi güçlendirmiştir. II. Mahmut tarafından kaldırılmıştır.</small>"
@@ -1339,6 +2017,126 @@
         }
     ],
     "inkilap": [
+        {
+            "q": "Mondros Ateşkesi'nden sonra işgal edilen İLK Osmanlı toprağı neresidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Musul (İngiltere tarafından)<hr><small><strong>Açıklama:</strong> Petrol zengini Musul, 3 Kasım 1918'de Mondros'un 7. maddesi bahane edilerek İngilizler tarafından haksız yere işgal edilen İLK yerdir.</small>"
+        },
+        {
+            "q": "Mondros Ateşkesi'nden sonra 'Anadolu'da' işgal edilen İLK yer neresidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Hatay / Dörtyol (Fransa tarafından)<hr><small><strong>Açıklama:</strong> İşgallere karşı Anadolu'da İLK SİLAHLI DİRENİŞ (İlk Kurşun) yine burada Fransızlara karşı Mehmet Çavuş tarafından gerçekleştirilmiştir (İzmir'den daha öncedir).</small>"
+        },
+        {
+            "q": "Kurtuluş Savaşı'nda Batı Cephesi komutanlığının kurulduğu ve Ali Fuat Paşa'nın atandığı gelişme hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Sivas Kongresi<hr><small><strong>Açıklama:</strong> Temsil Heyeti'nin, Ali Fuat Paşa'yı Batı Cephesi Umum Kuvayi Milliye komutanlığına ataması, onun İLK DEFA YÜRÜTME (Hükümet) yetkisini kullandığını gösterir.</small>"
+        },
+        {
+            "q": "İstiklal Marşı'nın yayımlandığı İLK gazete ve İLK dergi hangileridir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Açıksöz (Gazete) / Sebilürreşad (Dergi)<hr><small><strong>Açıklama:</strong> Mehmet Akif Ersoy marşı Kastamonu'daki Açıksöz gazetesinde ve kendi başyazarı olduğu Sırat-ı Müstakim (Sebilürreşad) dergisinde yayımlamış, yarışmadan kazandığı ödülü Darülmesai'ye bağışlamıştır.</small>"
+        },
+        {
+            "q": "1923 yılında imzalanan Lozan Barış Antlaşması'nı onaylayan (yürürlüğe sokan) meclis hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "II. TBMM<hr><small><strong>Açıklama:</strong> Antlaşmayı imzalayan I. TBMM'dir (Heyet başkanı İsmet Paşa). Ancak meclis seçimleri yenilendiği için, antlaşmayı onaylayıp yürürlüğe koyan YENİ MECLİS (II. TBMM) olmuştur. (Çok düşüren detaydır).</small>"
+        },
+        {
+            "q": "Türkiye Cumhuriyeti'nin İLK kadın belediye başkanı kimdir ve nerede görev yapmıştır?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Sadiye Hanım - Artvin (Yusufeli İlçesi Kılıçkaya Beldesi)<hr><small><strong>Açıklama:</strong> 1930 yılında kadınlara belediye seçimlerine katılma hakkı verilmesiyle Sadiye Hanım Türkiye'nin ilk kadın belediye başkanı olmuştur. (İlk kadın muhtar: Gül Esin, İlk kadın vekil: Satı Kadın).</small>"
+        },
+        {
+            "q": "Cumhuriyet tarihinin İLK muhalefet partisi olan Terakkiperver Cumhuriyet Fırkası'nın (Kazım Karabekir önderliğinde kurulan) ilk şubesinin açıldığı ilimiz neresidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Urfa<hr><small><strong>Açıklama:</strong> TCF'nin ilk şubesi Urfa'da açılmıştır. Parti programında 'Partimiz dini inançlara saygılıdır' maddesi yer almış, bu da gericilerin partiye sızmasına (Şeyh Sait İsyanı'na) zemin hazırlamıştır.</small>"
+        },
+        {
+            "q": "Kurtuluş Savaşı yıllarında (1920) TBMM'nin 'yarı resmi yayın organı' olarak bilinen ve Milli Mücadele'nin adeta sözcülüğünü yapan gazete hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Hakimiyet-i Milliye<hr><small><strong>Açıklama:</strong> Sivas Kongresi'nde çıkarılan İrade-i Milliye gazetesinin Ankara'daki devamı niteliğindedir. TBMM'nin yarı resmi, İstiklal Harbi'nin en önemli propaganda organıdır (Resmi organ ise Ceride-i Resmiye'dir).</small>"
+        },
+        {
+            "q": "Mustafa Kemal'in resmi görevinden (9. Ordu Müfettişliği) ve çok sevdiği askerlik mesleğinden istifa ettiği (Sine-i Millete döndüğü) olay HANGİ İKİ GELİŞME arasında yaşanmıştır?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Amasya Genelgesi ile Erzurum Kongresi Arasında<hr><small><strong>Açıklama:</strong> Mustafa Kemal, Amasya Genelgesi'nden sonra Erzurum'a geçmiş ve kongre öncesinde istifa ederek mücadelesine sivil olarak devam etmiştir.</small>"
+        },
+        {
+            "q": "Milli Mücadele döneminde, Misak-ı Milli kararlarının Mebusan Meclisi'nde (İstanbul) kabul edilmesinin en önemli ve yıkıcı SONUCU ne olmuştur?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "İstanbul'un resmen işgal edilmesi (16 Mart 1920)<hr><small><strong>Açıklama:</strong> İtilaf Devletleri, Misak-ı Milli'nin kabul edilmesine tepki olarak Meclis-i Mebusan'ı dağıtmış, milletvekillerini sürgüne göndermiş ve İstanbul'u işgal etmiştir. Bu durum TBMM'nin açılmasını hızlandırmıştır.</small>"
+        },
+        {
+            "q": "Sevr Barış Antlaşması'nın hukuken geçersiz (ölü doğmuş) bir antlaşma olmasının hukuki (resmi) nedeni nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Mebusan Meclisi tarafından onaylanmamış olması.<hr><small><strong>Açıklama:</strong> Kanuni Esasi'ye göre uluslararası antlaşmalar meclis onayından geçmelidir. Mebusan Meclisi o sırada kapalı/dağıtılmış olduğu için Sevr hiçbir zaman meclis onayından geçmemiş ve hukuken geçersiz kalmıştır.</small>"
+        },
+        {
+            "q": "Kurtuluş Savaşı'nda Batı Cephesi komutanlığının ikiye bölünerek, İsmet İnönü ve Refet Bele'ye verilmesine neden olan, düzenli ordu öncesindeki KUVAYİ MİLLİYE başarısızlığı hangi muharebedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Gediz Taarruzu<hr><small><strong>Açıklama:</strong> Ali Fuat Paşa komutasındaki Kuvayi Milliye birliklerinin Yunanlara karşı giriştiği bu başarısız taarruz, düzenli ordunun kurulmasının ne kadar şart olduğunu göstermiştir.</small>"
+        },
+        {
+            "q": "Sakarya Meydan Muharebesi'nin kazanılmasının ardından, Fransa ile imzalanan 1921 Ankara Antlaşması'nın en önemli SİYASİ sonucu nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "İtilaf Blokunun (İttifakının) parçalanması.<hr><small><strong>Açıklama:</strong> Fransa'nın İngiltere'den ayrılarak TBMM'yi resmen tanıması ve güney cephesinden çekilmesi, İtilaf Devletleri arasındaki görüş ayrılığını ve parçalanmayı kesinleştirmiştir.</small>"
+        },
+        {
+            "q": "Lozan Barış Konferansı'nda görüşülen ancak karara bağlanamayan, Türkiye ile İngiltere arasında ikili görüşmelere bırakılan TEK sorun nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Musul Sorunu (Irak Sınırı)<hr><small><strong>Açıklama:</strong> Lozan'da çözülemeyen tek konu Musul meselesidir. 1926 Ankara Antlaşması ile aleyhimize çözülerek İngiliz mandasındaki Irak'a bırakılmıştır.</small>"
+        },
+        {
+            "q": "Türkiye Cumhuriyeti'nde laik devlet düzenine geçişin en önemli adımı kabul edilen ve Osmanlı Hanedanı'nın yurt dışına çıkarılmasına karar verilen inkılap hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Halifeliğin Kaldırılması (3 Mart 1924)<hr><small><strong>Açıklama:</strong> Aynı gün çıkarılan yasalarla Şeriye ve Evkaf Vekaleti ile Erkan-ı Harbiye Umumiye vekaleti de kaldırılmış, Tevhid-i Tedrisat Kanunu kabul edilmiştir.</small>"
+        },
+        {
+            "q": "Terakkiperver Cumhuriyet Fırkası ve Serbest Cumhuriyet Fırkası'nın kapatılmalarındaki ORTAK gerekçe nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Cumhuriyet (Laiklik) rejimine karşı olan gericilerin partiye sızması ve isyanlar.<hr><small><strong>Açıklama:</strong> TCF Şeyh Sait isyanı sebebiyle, SCF ise kurulduktan kısa süre sonra rejim karşıtlarının doluşması üzerine (kendi kurucusu tarafından) kapatılmıştır (Ardından Menemen Olayı yaşanmıştır).</small>"
+        },
+        {
+            "q": "Yeni Türk Devleti'nde tarımsal üretimi artırmak ve köylünün üzerindeki ağır vergi yükünü hafifletmek amacıyla 1925 yılında kaldırılan vergi hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Aşar (Öşür) Vergisi<hr><small><strong>Açıklama:</strong> Halkçılık ilkesi doğrultusunda atılan en büyük adımlardan biridir ve köylü rahatlatılarak tarımsal üretimin önü açılmıştır.</small>"
+        },
+        {
+            "q": "1934 yılında kabul edilen Soyadı Kanunu, Atatürk ilkelerinden özellikle hangisi ile DOĞRUDAN ilişkilidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Halkçılık<hr><small><strong>Açıklama:</strong> Soyadı Kanunu ile unvan ve lakaplar (ağa, hacı, hafız vb.) yasaklanmış, toplumdaki sınıf ve statü ayrıcalıkları kaldırılarak 'eşitlik' (Halkçılık) sağlanmıştır.</small>"
+        },
+        {
+            "q": "Sivas Kongresi'nde tüm yararlı cemiyetlerin 'Anadolu ve Rumeli Müdafaa-i Hukuk Cemiyeti' adı altında birleştirilmesinin TEMEL amacı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Milli Mücadele'yi tek merkezden (elden) yönetmek.<hr><small><strong>Açıklama:</strong> Bölgesel kurtuluş çareleri arayan cemiyetler birleştirilerek ulusal birliğe ve tam bağımsızlığa ulaşma yolunda en önemli adım atılmıştır.</small>"
+        },
+        {
+            "q": "TBMM'yi tanıyan İLK İtilaf Devleti ve imzaladığı antlaşma hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Fransa - 1921 Ankara Antlaşması<hr><small><strong>Açıklama:</strong> Sakarya Meydan Muharebesi'nden sonra Fransa işgal ettiği güney illerini boşaltarak TBMM'yi resmen tanıyan ilk İtilaf Devleti olmuştur.</small>"
+        },
+        {
+            "q": "Tekâlif-i Milliye Emirleri (Milli Yükümlülükler) hangi savaşın öncesinde ordunun ihtiyaçlarını karşılamak için çıkarılmıştır?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Sakarya Meydan Muharebesi<hr><small><strong>Açıklama:</strong> Kütahya-Eskişehir Savaşlarındaki mağlubiyetin ardından Başkomutanlık yetkisini alan Mustafa Kemal tarafından bizzat meclis yetkisiyle çıkarılmıştır.</small>"
+        },
+        {
+            "q": "Cumhuriyet döneminde çok partili hayata geçişin İLK denemesi olan Terakkiperver Cumhuriyet Fırkası'nın kapatılmasına neden olan olay nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Şeyh Sait İsyanı (1925)<hr><small><strong>Açıklama:</strong> Rejime karşı çıkan ilk büyük irticai ayaklanma olan Şeyh Sait isyanında partinin bazı üyelerinin parmağı olduğu gerekçesiyle Takrir-i Sükun kanununa dayanılarak kapatılmıştır.</small>"
+        },
+        {
+            "q": "1926 yılında kabul edilen Medeni Kanun ile Türk kadınına HANGİ haklar VERİLMEMİŞTİR?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Siyasi Haklar (Seçme ve Seçilme hakkı)<hr><small><strong>Açıklama:</strong> Medeni Kanun sadece sosyal, ekonomik ve hukuki eşitlik getirmiştir (Evlenme, boşanma, miras, meslek seçme). Siyasi haklar daha sonra 1930, 1933 ve 1934 yıllarında verilmiştir (BMW şifresi).</small>"
+        },
+        {
+            "q": "Milli Mücadele'nin amacı, gerekçesi ve yönteminin İLK kez belirtildiği tarihi belge hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Amasya Genelgesi<hr><small><strong>Açıklama:</strong> 'Vatanın bütünlüğü ve milletin bağımsızlığı tehlikededir' (Gerekçe) ve 'Milletin bağımsızlığını yine milletin azim ve kararı kurtaracaktır' (Amaç ve Yöntem) maddeleri yer alır. İlk defa milli egemenlikten bahsedilmiştir.</small>"
+        },
+        {
+            "q": "Milli sınırların (Misak-ı Milli) İLK kez çizildiği ve Erzurum Kongresi'nde karara bağlanan madde hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Milli sınırlar içinde vatan bir bütündür, bölünemez.<hr><small><strong>Açıklama:</strong> Erzurum Kongresi toplanış şekli bakımından bölgesel, aldığı kararlar bakımından ulusal bir kongredir. İlk kez manda ve himaye reddedilmiştir.</small>"
+        },
+        {
+            "q": "Sivas Kongresi'nde tüm yararlı cemiyetlerin 'Anadolu ve Rumeli Müdafaa-i Hukuk Cemiyeti' adı altında birleştirilmesinin TEMEL amacı nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Milli Mücadele'yi tek merkezden (elden) yönetmek.<hr><small><strong>Açıklama:</strong> Bölgesel kurtuluş çareleri arayan cemiyetler birleştirilerek ulusal birliğe ve tam bağımsızlığa ulaşma yolunda en önemli adım atılmıştır.</small>"
+        },
+        {
+            "q": "TBMM'yi tanıyan İLK İtilaf Devleti ve imzaladığı antlaşma hangisidir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Fransa - 1921 Ankara Antlaşması<hr><small><strong>Açıklama:</strong> Sakarya Meydan Muharebesi'nden sonra Fransa işgal ettiği güney illerini boşaltarak TBMM'yi resmen tanıyan ilk İtilaf Devleti olmuştur.</small>"
+        },
+        {
+            "q": "Tekâlif-i Milliye Emirleri (Milli Yükümlülükler) hangi savaşın öncesinde ordunun ihtiyaçlarını karşılamak için çıkarılmıştır? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Sakarya Meydan Muharebesi<hr><small><strong>Açıklama:</strong> Kütahya-Eskişehir Savaşlarındaki mağlubiyetin ardından Başkomutanlık yetkisini alan Mustafa Kemal tarafından bizzat meclis yetkisiyle çıkarılmıştır.</small>"
+        },
+        {
+            "q": "Cumhuriyet döneminde çok partili hayata geçişin İLK denemesi olan Terakkiperver Cumhuriyet Fırkası'nın kapatılmasına neden olan olay nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Şeyh Sait İsyanı (1925)<hr><small><strong>Açıklama:</strong> Rejime karşı çıkan ilk büyük irticai ayaklanma olan Şeyh Sait isyanında partinin bazı üyelerinin parmağı olduğu gerekçesiyle Takrir-i Sükun kanununa dayanılarak kapatılmıştır.</small>"
+        },
+        {
+            "q": "1926 yılında kabul edilen Medeni Kanun ile Türk kadınına HANGİ haklar VERİLMEMİŞTİR? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Siyasi Haklar (Seçme ve Seçilme hakkı)<hr><small><strong>Açıklama:</strong> Medeni Kanun sadece sosyal, ekonomik ve hukuki eşitlik getirmiştir (Evlenme, boşanma, miras, meslek seçme). Siyasi haklar sırasıyla 1930(Belediye), 1933(Muhtar) ve 1934(Vekil) yıllarında verilmiştir (BMW şifresi).</small>"
+        },
         {
             "q": "Mustafa Kemal'in 9. Ordu Müfettişi olarak görev bölgesinde yer alan, Mondros'un 24. maddesiyle İtilaf Devletleri'nin Ermenistan kurmayı hayal ettiği 6 vilayete (Vilayet-i Sitte) hangi iller dahildir?",
             "a": "Erzurum, Van, Bitlis, Diyarbakır, Elazığ (Harput), Sivas (Kısaltma: BESDEV)<hr><small><strong>Açıklama:</strong> Bu illerde Ermeni nüfusunun çoğunlukta olduğu iddia edilmiş ve buralar için ayrı bir işgal maddesi (Madde 24) konulmuştur.</small>"
@@ -1774,6 +2572,118 @@
     ],
     "cagdas": [
         {
+            "q": "II. Dünya Savaşı sırasında Türkiye'de haksız kazanç sağlayan savaş zenginlerinden vergi almak için çıkarılan kanun hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Varlık Vergisi Kanunu (1942)<hr><small><strong>Açıklama:</strong> Şükrü Saracoğlu hükümeti tarafından çıkarılmış, vergisini nakit olarak ödeyemeyenler (özellikle gayrimüslimler) Aşkale'deki çalışma kamplarına gönderildiği için uluslararası tepki çekmiştir.</small>"
+        },
+        {
+            "q": "1979'da Sovyet Rusya'nın (SSCB) Afganistan'ı işgal etmesi üzerine ABD'nin uyguladığı protesto eylemi nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "1980 Moskova Olimpiyatları'nı boykot etmek<hr><small><strong>Açıklama:</strong> Soğuk Savaş yılları spora da yansımış, ABD ve müttefikleri Moskova'ya gitmeyerek olimpiyatları boykot etmiştir (1984'te de SSCB, Los Angeles olimpiyatlarını boykot etmiştir).</small>"
+        },
+        {
+            "q": "1989 yılında komünist rejime karşı başlayan 'Kadife Devrim' sonucunda ikiye bölünen ülke hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Çekoslovakya (Çekya ve Slovakya olarak ayrıldı)<hr><small><strong>Açıklama:</strong> Yugoslavya ve SSCB'nin aksine, Çekoslovakya'nın bölünmesi tamamen kan dökülmeden (demokratik oylama ve barışçıl yollarla) olduğu için buna 'Kadife Devrim' (Kadife Ayrılık) denmiştir.</small>"
+        },
+        {
+            "q": "ABD'nin, 1957 yılında 'Ortadoğu'yu' Sovyet tehdidinden korumak için yayımladığı yardım paketinin adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Eisenhower Doktrini<hr><small><strong>Açıklama:</strong> Doktrinin amacı Süveyş Krizi sonrası Ortadoğu'da oluşan boşluğun Sovyetler tarafından doldurulmasını engellemektir. Türkiye de bu paketten yararlanmıştır.</small>"
+        },
+        {
+            "q": "1964 yılında Kıbrıs meselesi (Kanlı Noel) yüzünden Türk savaş uçakları Ada'ya müdahale hazırlığı yaparken, ABD Başkanı'nın Türkiye'ye yolladığı ve Türk dış politikasında SSCB ile yakınlaşma gibi kırılmalar yaratan sert uyarının adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Johnson Mektubu<hr><small><strong>Açıklama:</strong> ABD Başkanı Lyndon B. Johnson, mektubunda Türkiye'nin Amerikan silahlarını (NATO silahlarını) Kıbrıs'ta kullanamayacağını ve olası bir Sovyet saldırısında NATO'nun Türkiye'yi yalnız bırakabileceğini belirtmiştir.</small>"
+        },
+        {
+            "q": "1974 Kıbrıs Barış Harekâtı'nın başlamasını sağlayan ve dönemin Dışişleri Bakanı Turan Güneş tarafından Başbakan Bülent Ecevit'e şifreli olarak iletilen 'Ayşe Tatile Çıksın' parolası kime aittir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Turan Güneş'in kızı Ayşe Güneş Ayata'ya aittir.<hr><small><strong>Açıklama:</strong> Cenevre görüşmelerinden sonuç alınamaması üzerine İkinci Kıbrıs Barış Harekâtı'nı başlatan diplomatik ve tarihi paroladır.</small>"
+        },
+        {
+            "q": "İkinci Dünya Savaşı yıllarında (1943), Cumhurbaşkanı İsmet İnönü ile İngiltere Başbakanı Winston Churchill arasında tren vagonunda yapılan ve Türkiye'nin savaşa girmeyi kibarca reddettiği ('Sağırlar Diyaloğu') görüşmenin adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Pusula Özel</span>",
+            "a": "Adana (Yenice) Görüşmeleri<hr><small><strong>Açıklama:</strong> Churchill Türkiye'yi Müttefikler safında savaşa sokmak istemiş, İnönü ise ordunun silah ve teçhizat eksikliğini öne sürerek bu isteği oyalama taktiğiyle savuşturmuştur.</small>"
+        },
+        {
+            "q": "İkinci Dünya Savaşı sonrasında, dünyanın ABD önderliğindeki Batı Bloku ve SSCB önderliğindeki Doğu Bloku olarak ikiye ayrıldığı gerginlik dönemine ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Soğuk Savaş Dönemi<hr><small><strong>Açıklama:</strong> Bu dönemde doğrudan sıcak çatışma yaşanmamış, silahlanma yarışı, uzay yarışı ve psikolojik yıpratma (diplomasi) ön planda olmuştur.</small>"
+        },
+        {
+            "q": "1947 yılında Sovyet Rusya'nın Doğu Avrupa ülkeleri (komünist partiler) üzerindeki kontrolünü artırmak ve ideolojik birliğini sağlamak için kurduğu teşkilat nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Kominform<hr><small><strong>Açıklama:</strong> Kominform, Marshall planına karşı ideolojik bir set çekmek için kurulmuş siyasi bir yapıdır. Ekonomik karşılığı ise COMECON'dur.</small>"
+        },
+        {
+            "q": "Asya, Afrika ve Latin Amerika'da sömürgecilikten yeni kurtulan ülkelerin (Hindistan, Mısır, Yugoslavya önderliğinde) ABD ve SSCB bloklarının dışında kalarak kurdukları teşkilatlanma nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Bağlantısızlar Hareketi (Üçüncü Dünya Ülkeleri)<hr><small><strong>Açıklama:</strong> 1955 Bandung Konferansı ile temelleri atılmış, 1961 Belgrad Konferansı ile resmen teşkilatlanmışlardır.</small>"
+        },
+        {
+            "q": "1974 Kıbrıs Barış Harekâtı'nın yapılmasına neden olan ve Kıbrıs'ta Enosis'i gerçekleştirmek için Makarios'a darbe yapan aşırı milliyetçi Rum örgütü kimler tarafından desteklenmiştir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Yunan Cuntası (Albaylar Cuntası) ve EOKA-B<hr><small><strong>Açıklama:</strong> Nikos Sampson liderliğinde yapılan bu darbe üzerine Türkiye, Garantörlük hakkını kullanarak Ada'ya müdahale etmiş ve Kıbrıs Barış Harekâtı'nı gerçekleştirmiştir.</small>"
+        },
+        {
+            "q": "İran-Irak Savaşı (1980-1988) sırasında ABD'nin, rehineleri kurtarmak ve Nikaragua'daki kontralara para aktarmak için gizlice İran'a silah sattığı skandalın adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "İrangate Skandalı<hr><small><strong>Açıklama:</strong> ABD'nin hem Irak'ı destekleyip hem de ambargo altındaki İran'a gizlice silah satmasının ortaya çıkması, Reagan yönetimini zor durumda bırakan büyük bir diplomatik kriz olmuştur.</small>"
+        },
+        {
+            "q": "1917 Bolşevik İhtilali ile Çarlık Rusya'sının yıkılması sürecinde, Orta Asya Türklerinin Rus boyunduruğundan kurtulmak için başlattıkları bağımsızlık mücadelesine ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Basmacı Hareketi<hr><small><strong>Açıklama:</strong> Korbaşı Ergaş önderliğinde Hokand'da başlayan ve Enver Paşa'nın da katılarak şehit olduğu bu hareket, Rusların ağır silahları karşısında başarısız olmuştur.</small>"
+        },
+        {
+            "q": "SSCB'nin 1991 yılında dağılmasına yol açan, Mihail Gorbaçov'un uyguladığı 'Açıklık' (Glasnost) ve 'Yeniden Yapılanma' reformlarına ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Perestroyka ve Glasnost<hr><small><strong>Açıklama:</strong> Bu politikalar SSCB ekonomisini düzeltmek yerine merkezi otoriteyi zayıflatmış ve SSCB'nin parçalanmasını hızlandırmıştır.</small>"
+        },
+        {
+            "q": "Birinci Dünya Savaşı sonrasında Ortadoğu'yu (Suriye, Irak, Filistin) paylaşmak için İngiltere ve Fransa arasında imzalanan İLK gizli antlaşma hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Sykes-Picot Antlaşması (1916)<hr><small><strong>Açıklama:</strong> Bu antlaşma, modern Ortadoğu'nun sınırlarının cetvelle çizilmesine ve günümüze kadar süren kronik sorunların (İsrail-Filistin) temelinin atılmasına neden olmuştur.</small>"
+        },
+        {
+            "q": "İkinci Dünya Savaşı sırasında ABD'nin savaşa girmesine neden olan ve Japonya'nın Amerikan donanmasına yaptığı baskının adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Pearl Harbor Baskını (1941)<hr><small><strong>Açıklama:</strong> Bu baskın üzerine ABD, İzolasyonizm (Monroe) politikasından çıkarak savaşa Müttefik Devletler safında katılmış ve savaşın seyrini değiştirmiştir.</small>"
+        },
+        {
+            "q": "1992 yılında Avrupa Ekonomik Topluluğu'nu (AET) siyasi bir birliğe (Avrupa Birliği - AB) dönüştüren ve tek para birimine (Euro) geçişin temellerini atan antlaşma hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Maastricht Antlaşması<hr><small><strong>Açıklama:</strong> Bu antlaşma ile Avrupa Birliği vatandaşlığı kavramı getirilmiş ve ekonomik entegrasyondan siyasi entegrasyona geçilmiştir.</small>"
+        },
+        {
+            "q": "Soğuk Savaş döneminde SSCB'nin yayılmacı politikasına (Komünizm tehdidine) karşı ABD'nin Avrupa ülkelerine yaptığı ekonomik yardım paketinin adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Marshall Planı<hr><small><strong>Açıklama:</strong> Truman Doktrini askeri ve siyasi destek sağlarken, Marshall Planı Avrupa'yı ekonomik olarak kalkındırıp komünizmden uzak tutmayı hedefleyen kapsamlı bir kalkınma planıdır (Türkiye de yararlanmıştır).</small>"
+        },
+        {
+            "q": "1955 yılında Sovyetler Birliği ve Doğu Bloku ülkelerinin, NATO'ya karşı kurdukları askeri ve siyasi ittifakın adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Varşova Paktı<hr><small><strong>Açıklama:</strong> Sovyet Rusya önderliğinde kurulan bu pakt, Soğuk Savaş yıllarında iki kutuplu dünyanın Doğu kanadını temsil etmiştir.</small>"
+        },
+        {
+            "q": "Kıbrıs sorunu sürecinde, Kıbrıs'ı Yunanistan'a bağlama idealine (Enosis) hizmet eden Rum yeraltı terör örgütünün adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "EOKA<hr><small><strong>Açıklama:</strong> EOKA'nın Türklere yönelik katliamlarına karşı Kıbrıslı Türkler de kendilerini savunmak amacıyla Türk Mukavemet Teşkilatı'nı (TMT) kurmuşlardır.</small>"
+        },
+        {
+            "q": "İkinci Dünya Savaşı sonrasında, ABD ile SSCB arasındaki gerilimin azalmaya başladığı ve karşılıklı görüşmelerin yapıldığı döneme ne ad verilir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Yumuşama (Detant) Dönemi<hr><small><strong>Açıklama:</strong> 1960'ların başında başlayan bu dönem, özellikle 1962 Küba Füze Krizi'nden sonra nükleer savaşın eşiğinden dönülmesiyle hız kazanmıştır.</small>"
+        },
+        {
+            "q": "Bosna Savaşı sırasında 1995 yılında Sırp kuvvetleri tarafından gerçekleştirilen ve İkinci Dünya Savaşı'ndan sonra Avrupa'daki en büyük katliam olarak kabul edilen olayın adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Srebrenitsa Katliamı<hr><small><strong>Açıklama:</strong> BM'nin güvenli bölge ilan etmesine rağmen, Hollandalı Barış Gücü askerlerinin gözaltında binlerce Boşnak erkeğin katledildiği trajik bir olaydır.</small>"
+        },
+        {
+            "q": "Türkiye'nin Kore Savaşı'na asker göndermesi sonucunda 1952 yılında üye olduğu uluslararası ittifak hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "NATO (Kuzey Atlantik Antlaşması Örgütü)<hr><small><strong>Açıklama:</strong> Türkiye, Sovyet tehdidine karşı Batı bloğunda yer almak ve güvenliğini sağlamak amacıyla Demokrat Parti döneminde NATO'ya üye olmuştur.</small>"
+        },
+        {
+            "q": "Soğuk Savaş döneminde SSCB'nin yayılmacı politikasına (Komünizm tehdidine) karşı ABD'nin Avrupa ülkelerine yaptığı ekonomik yardım paketinin adı nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Marshall Planı<hr><small><strong>Açıklama:</strong> Truman Doktrini askeri ve siyasi destek sağlarken, Marshall Planı Avrupa'yı ekonomik olarak kalkındırıp komünizmden uzak tutmayı hedefleyen kapsamlı bir kalkınma planıdır (Türkiye de yararlanmıştır).</small>"
+        },
+        {
+            "q": "1955 yılında Sovyetler Birliği ve Doğu Bloku ülkelerinin, NATO'ya karşı kurdukları askeri ve siyasi ittifakın adı nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Varşova Paktı<hr><small><strong>Açıklama:</strong> Sovyet Rusya önderliğinde kurulan bu pakt, Soğuk Savaş yıllarında iki kutuplu dünyanın Doğu kanadını temsil etmiştir.</small>"
+        },
+        {
+            "q": "Kıbrıs sorunu sürecinde, Kıbrıs'ı Yunanistan'a bağlama idealine (Enosis) hizmet eden Rum yeraltı terör örgütünün adı nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "EOKA<hr><small><strong>Açıklama:</strong> EOKA'nın Türklere yönelik katliamlarına karşı Kıbrıslı Türkler de kendilerini savunmak amacıyla Türk Mukavemet Teşkilatı'nı (TMT) kurmuşlardır.</small>"
+        },
+        {
+            "q": "İkinci Dünya Savaşı sonrasında, ABD ile SSCB arasındaki gerilimin azalmaya başladığı ve karşılıklı görüşmelerin yapıldığı döneme ne ad verilir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Yumuşama (Detant) Dönemi<hr><small><strong>Açıklama:</strong> 1960'ların başında başlayan bu dönem, özellikle 1962 Küba Füze Krizi'nden sonra nükleer savaşın eşiğinden dönülmesiyle hız kazanmıştır.</small>"
+        },
+        {
+            "q": "Bosna Savaşı sırasında 1995 yılında Sırp kuvvetleri tarafından gerçekleştirilen ve İkinci Dünya Savaşı'ndan sonra Avrupa'daki en büyük katliam olarak kabul edilen olayın adı nedir? <span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>Fetihname</span>",
+            "a": "Srebrenitsa Katliamı<hr><small><strong>Açıklama:</strong> BM'nin güvenli bölge ilan etmesine rağmen, Hollandalı Barış Gücü askerlerinin gözaltında binlerce Boşnak erkeğin katledildiği trajik bir olaydır.</small>"
+        },
+        {
             "q": "Rusya'da 1917 Bolşevik Devrimi sonrasında, Sovyet yönetimine karşı bağımsızlık mücadelesi veren ve Enver Paşa'nın da katılarak şehit olduğu Orta Asya merkezli direniş hareketinin adı nedir?",
             "a": "Basmacı Hareketi<hr><small><strong>Açıklama:</strong> 'Baskın yapanlar' anlamına gelen bu hareket, Korbaşı Ergaş liderliğinde Hokand'da başlamış, Zeki Velidi Togan gibi aydınların ve Enver Paşa'nın katılımıyla büyümüş ancak Kızıl Ordu tarafından ezilmiştir.</small>"
         },
@@ -2056,6 +2966,46 @@
     ],
     "cikmis_islamiyet": [
         {
+            "q": "Göktürklerde Hakan'ın çadırına (otag) giren bir elçinin kılıcını bırakması, aşağıdaki kavramlardan hangisine verilen önemi gösterir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Töre'ye bağlılık ve Hakan'ın otoritesine saygı<hr><small><strong>Açıklama:</strong> Eski Türklerde hakanın otağı devletin kalbi sayılırdı. Oraya silahla girilmemesi, törenin (hukukun) ve hakanın otoritesinin herkesin üstünde olduğunu gösterir.</small>"
+        },
+        {
+            "q": "İslamiyet öncesi Türk devletlerinde 'Toy' adı verilen şenliklerde, kesilen hayvanın etinin boylar arasında hiyerarşik bir sıraya göre dağıtılmasına ne ad verilirdi?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Ülüş (Pay, hisse)<hr><small><strong>Açıklama:</strong> Ülüş, aynı zamanda 'Kut, Küç, Ülüş' üçlemesinde yer alan ve Tanrı tarafından hakana verildiğine inanılan 'ekonomik güç ve bereketi paylaştırma' yetkisidir.</small>"
+        },
+        {
+            "q": "Tarihte 'Türk' adını siyasi bir devlet adı olarak kullanan İLK devlet olan I. Göktürk Devleti'nin kurucusu kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Bumin Kağan<hr><small><strong>Açıklama:</strong> Bumin Kağan, Avarlara (Juan Juanlar) karşı isyan ederek devleti kurmuş ve 'İl Kağan' unvanını almıştır. Devletin batı kanadını ise kardeşi İstemi Yabgu yönetmiştir.</small>"
+        },
+        {
+            "q": "Avarların (Juan Juanlar) İstanbul'u kuşatan İLK Türk devleti olmasında HANGİ devlet ile yaptıkları ittifak etkili olmuştur?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Sasaniler<hr><small><strong>Açıklama:</strong> Avarlar, Bizans'ın başkenti İstanbul'u Sasaniler ile işbirliği yaparak iki kez (619 ve 626) kuşatmışlar ancak deniz güçleri olmadığı için başarılı olamamışlardır.</small>"
+        },
+        {
+            "q": "İlk Türk devletlerinde 'Kut' inancının en belirgin OLUMSUZ siyasi sonucu nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Sık sık taht kavgalarının yaşanması ve devletlerin kısa sürede yıkılması<hr><small><strong>Açıklama:</strong> Kut (yönetme yetkisi) kan yoluyla tüm hanedan erkeklerine geçtiği için her şehzadenin (Tigin) tahtta hak iddia etmesine ve iç savaşlara ('Ülke hanedanın ortak malıdır' anlayışına) yol açmıştır.</small>"
+        },
+        {
+            "q": "Uygurların tapınaklarına 'Stupa' adı verilir. Bu tapınak mimarisinin gelişmesi Türk tarihinde hangi sanat dalının İLK örneklerinin verilmesini sağlamıştır?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Fresko (Duvar Resmi)<hr><small><strong>Açıklama:</strong> Uygurlar yerleşik hayata geçtikleri için tapınak duvarlarına fresko adı verilen resimler yapmışlar ve mimari eserler bırakmışlardır. Göçebe Türklerde ise sadece taşınabilir sanat eserleri vardı.</small>"
+        },
+        {
+            "q": "Asya Hun Devleti ile Çin arasında yüzyıllar boyunca süren çatışmaların TEMEL EKONOMİK nedeni nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "İpek Yolu denetimini ele geçirmek<hr><small><strong>Açıklama:</strong> Orta Asya'daki Türk-Çin mücadelelerinin en büyük sebebi, dünyanın en önemli ticaret güzergahı olan İpek Yolu'nun hakimiyetini sağlamaktı.</small>"
+        },
+        {
+            "q": "Uygurlar döneminde hukuk kurallarının (Töre) yazılı hale getirilmesinin ve çeşitli sözleşmeler (kira, alım-satım, borç) yapılmasının EN ÖNEMLİ sebebi nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Yerleşik hayata geçilmesi ve ticaretin gelişmesi<hr><small><strong>Açıklama:</strong> Yerleşik hayata geçişle birlikte mülkiyet kavramı ve ticari ilişkiler karmaşıklaşmış, bu da sözlü törenin yazılı belgelere dönüşmesini zorunlu kılmıştır.</small>"
+        },
+        {
+            "q": "İslamiyet öncesi Türklerde 'Oguş' (Aile) ile başlayan toplumsal yapılanmanın en üst basamağında yer alan ve 'Devlet' anlamına gelen kavram hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "İl (El)<hr><small><strong>Açıklama:</strong> Türklerde toplumsal hiyerarşi sırasıyla; Oguş (Aile) -> Urug (Sülale) -> Boy -> Budun (Millet) -> İl/El (Devlet) şeklindedir.</small>"
+        },
+        {
+            "q": "Kırgızlara ait olan ve dünyanın en uzun destanı olma özelliğini hala koruyan, Türk kültürü hakkında önemli bilgiler veren destan hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Manas Destanı<hr><small><strong>Açıklama:</strong> Kırgızlara ait olan Manas Destanı, sözlü edebiyatımızın en hacimli eseridir ve günümüzde dahi eklemeler yapılarak yazılmaya devam edilmektedir.</small>"
+        },
+        {
             "q": "Çin ile Asya Hun Devleti (Mete Han) arasında yapılan ve Türk adının geçtiği ilk uluslararası belge olarak kabul edilen antlaşma hangisidir?",
             "a": "Kuzey Şansi Antlaşması <br><i>(2022 KPSS Lisans)</i><hr><small><strong>Açıklama:</strong> Tarihte Türk adının geçtiği ilk siyasi ve uluslararası yazılı belge bu antlaşmadır.</small>"
         },
@@ -2177,6 +3127,46 @@
         }
     ],
     "cikmis_turk_islam": [
+        {
+            "q": "Gazneli Mahmut'un Hindistan'a düzenlediği 17 seferin TEMEL AMACI nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "İslamiyet'i yaymak ve bölgenin yeraltı/yerüstü zenginliklerini ele geçirmek<hr><small><strong>Açıklama:</strong> Gazneli Mahmut, Hindistan'a yaptığı 17 sefer (en ünlüsü Somnat Seferi) ile İslamiyet'i oraya taşımış ve bugünkü Pakistan, Bangladeş gibi devletlerin temelini atmıştır.</small>"
+        },
+        {
+            "q": "Mısır'da kurulan Türk-İslam devletlerinden hangisi, Moğolları (İlhanlıları) Ayn Calut (1260) ve Elbistan (1277) savaşlarında yenerek Moğol ilerleyişini durduran TEK devlettir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Memlükler (Kölemenler)<hr><small><strong>Açıklama:</strong> Kutuz ve Baybars komutasındaki Memlük ordusu, yenilmez sanılan Moğolları durdurarak İslam dünyasını büyük bir yıkımdan kurtarmıştır.</small>"
+        },
+        {
+            "q": "Büyük Selçuklu Devleti'nde ikta (toprak) sisteminin İLK kez uygulandığı dönem ve bu sistemin geliştiricisi kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Sultan Melikşah Dönemi / Nizamülmülk<hr><small><strong>Açıklama:</strong> Ünlü Vezir Nizamülmülk tarafından sistemleştirilen ikta sistemi, hem ordunun atlı asker (Sipahi) ihtiyacını karşılamış hem de tarımsal üretimin sürekliliğini sağlamıştır.</small>"
+        },
+        {
+            "q": "Anadolu Selçuklu Devleti'nin resmi dili Farsça olmasına rağmen, Karamanoğlu Mehmet Bey'in 1277'de Türkçe'yi resmi dil ilan etmesinin amacı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Türk kültürünü korumak ve halk ile yönetim arasındaki kopukluğu gidermek<hr><small><strong>Açıklama:</strong> Sarayda Farsça, bilimde Arapça kullanılması halk ile devleti ayırıyordu. Karamanoğlu Mehmet Bey'in 'Bugünden sonra divanda, dergahta, bargahta, mecliste ve meydanda Türkçeden başka dil kullanılmayacaktır' fermanı milliyetçiliğin en büyük göstergesidir.</small>"
+        },
+        {
+            "q": "Büyük Selçuklu Devleti'nin 'resmen' kurulmasını sağlayan ve Gaznelilerin yıkılış sürecine girmesine neden olan 1040 tarihli savaş hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Dandanakan Savaşı<hr><small><strong>Açıklama:</strong> Tuğrul ve Çağrı Beyler komutasındaki Selçuklular, Gazneli Sultan Mesut'u Dandanakan'da yenerek tam bağımsızlıklarını ilan etmişlerdir.</small>"
+        },
+        {
+            "q": "Karahanlılar Devleti'nin, Türk-İslam sentezinin temellerini atmasında HANGİ özelliği etkili olmuştur?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Yöneticisinin, ordusunun ve halkının tamamen Türklerden oluşması<hr><small><strong>Açıklama:</strong> Mısır'da kurulan devletlerin (Tolunoğulları) aksine Karahanlıların tamamen Türk bir coğrafyada kurulması, onların Türk kültürünü İslamiyet ile yoğurup (Türk-İslam sentezi) yeni bir medeniyet yaratmasını sağlamıştır.</small>"
+        },
+        {
+            "q": "Anadolu Selçuklu Devleti'nde esnaf ve zanaatkarların kendi aralarında kurdukları, mesleki dayanışmayı, ahlakı ve kaliteyi denetleyen sosyo-ekonomik teşkilat nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Ahilik Teşkilatı<hr><small><strong>Açıklama:</strong> Ahi Evran tarafından kurulan bu teşkilat, hem üretimi denetler, hem meslek ahlakını (fütüvvet) öğretir, hem de haksız rekabeti önlerdi. Osmanlı'daki karşılığı 'Lonca' teşkilatıdır.</small>"
+        },
+        {
+            "q": "Sultan Alparslan'ın Malazgirt Savaşı'ndan (1071) sonra komutanlarına 'Fethettiğiniz yer sizindir' (Kılıç Hakkı) demesinin en büyük SİYASİ SONUCU ne olmuştur?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Anadolu'da İlk Türk Beyliklerinin kurulması ve fethin hızlanması<hr><small><strong>Açıklama:</strong> Kılıç hakkı sayesinde Danişmentliler, Saltuklular, Mengücekler ve Artuklular gibi beylikler kurulmuş, Anadolu kısa sürede Türkleşmiş ve İslamlaşmıştır.</small>"
+        },
+        {
+            "q": "Türk-İslam devletlerinde padişahın yiyeceklerinin hazırlanmasından ve sofra hizmetlerinden sorumlu saray görevlisine ne ad verilirdi?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Çeşnigir (Çaşnigir)<hr><small><strong>Açıklama:</strong> Çeşnigirbaşı, sultanın zehirlenme ihtimaline karşı yemekleri önceden tadan ve sofra adabını yöneten önemli bir saray görevlisidir.</small>"
+        },
+        {
+            "q": "Karahanlılar döneminde Edip Ahmet Yükneki tarafından yazılan ve 'Hakikatlerin Eşiği' anlamına gelen, ahlaki öğütler içeren didaktik eser hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Atabetü'l Hakayık<hr><small><strong>Açıklama:</strong> Geçiş dönemi eserlerinden olan Atabetü'l Hakayık, İslam ahlakını ve faziletleri anlatan önemli bir Türk-İslam edebiyatı ürünüdür.</small>"
+        },
         {
             "q": "Tolunoğulları döneminde Mısır'da inşa edilen, halka ücretsiz sağlık hizmeti veren ve ilaç dağıtan kurumlara ne ad verilirdi?",
             "a": "Maristan <br><i>(2022 KPSS Lisans)</i><hr><small><strong>Açıklama:</strong> Sosyal devlet anlayışının ve İslam dünyasındaki hastane kültürünün ilk örneklerindendir.</small>"
@@ -2300,6 +3290,46 @@
     ],
     "cikmis_osmanli": [
         {
+            "q": "Osmanlı Devleti'nde padişahın fermanı veya beratı ile bir kimseye verilen, karşılığında vergi toplanan toprakların (Dirlik) mülkiyetinin DEVLETE ait olmasının TEMEL NEDENİ nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Feodal bir yapının (Derebeylik) oluşmasını engellemek<hr><small><strong>Açıklama:</strong> Toprağın mülkiyeti devlette (Miri Arazi), kullanma hakkı köylüde, vergi toplama hakkı ise sipahideydi. Böylece Avrupa'daki gibi toprağa sahip güçlü senyörlerin (derebeylerin) ortaya çıkması engellenmiştir.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde 1856 Islahat Fermanı ile gayrimüslimlere verilen HANGİ HAK, Müslüman halk ile eşitliği sağlamaktan çok, Osmanlı toplum yapısını bozmuş ve tepki çekmiştir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Bedelli askerlik yapabilme ve devlet memuru olabilme hakkı<hr><small><strong>Açıklama:</strong> Islahat Fermanı, gayrimüslimleri Müslümanlardan daha ayrıcalıklı bir konuma getirmiş, bu da Müslüman tebaanın tepkisine (Kuleli Olayı) neden olmuştur.</small>"
+        },
+        {
+            "q": "Yavuz Sultan Selim'in Mısır Seferi (Ridaniye 1517) sonucunda Memlükleri yıkmasıyla Osmanlı Devleti'nin kazandığı SİYASİ ve DİNİ en büyük güç nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Halifeliğin Osmanlı'ya geçmesi<hr><small><strong>Açıklama:</strong> Bu zaferle birlikte Osmanlı padişahları İslam dünyasının hem siyasi hem de dini lideri (Halife) olmuşlar, devletin teokratik (dini) yapısı güçlenmiştir.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde Divan-ı Hümayun'da padişahın mührünü taşıyan, iç ve dış yazışmaları yürüten, dirlik topraklarının dağıtımını kaydeden (Tahrir defterlerine yazan) görevli kimdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Nişancı<hr><small><strong>Açıklama:</strong> Nişancı bürokrasi sınıfının (Kalemiye) başıdır. Örfi hukuku iyi bilir. Ayrıca padişah fermanlarına tuğra çekmek de onun görevidir.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde 19. yüzyılda (1881) Muharrem Kararnamesi ile kurulan Düyun-u Umumiye idaresi, devletin hangi alandaki bağımsızlığını FİİLEN sona erdirmiştir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Ekonomik (Mali) Bağımsızlık<hr><small><strong>Açıklama:</strong> Avrupalı devletler, Osmanlı'nın dış borçlarını ödeyememesi üzerine bu kurumu kurarak Osmanlı'nın tütün, tuz, ipek gibi en önemli vergi gelirlerine doğrudan el koymuşlardır.</small>"
+        },
+        {
+            "q": "I. Murat döneminde kurulan 'Devşirme Sistemi'nin (Yeniçeri Ocağı) Osmanlı Devleti'ne sağladığı EN BÜYÜK fayda nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Merkezi otoriteyi güçlendiren, padişaha sadık sürekli bir yaya ordusu (Kapıkulu) oluşturulması<hr><small><strong>Açıklama:</strong> Türkmen beylerinin güçlenmesini dengelemek için Hristiyan tebaadan alınan çocuklar devşirilerek doğrudan padişaha bağlı, profesyonel (maaşlı) merkez ordusu kurulmuştur.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nin kaybettiği toprakları geri alma ümidini doğuran 1711 Prut Antlaşması'ndan sonra, bu ümidin tamamen yok olduğu ve Batı'nın üstünlüğünün kabul edildiği 1718 antlaşması hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Pasarofça Antlaşması<hr><small><strong>Açıklama:</strong> Pasarofça Antlaşması ile Osmanlı, Avrupa'nın gerisinde kaldığını kabul etmiş ve Batı'yı örnek alan ıslahatların yapıldığı 'Lale Devri'ne girmiştir.</small>"
+        },
+        {
+            "q": "1876 Kanun-ı Esasi'de yer alan 'Meclisi açma ve kapatma yetkisi padişaha aittir' ile 'Padişah istediği kişiyi sürgüne gönderebilir (113. Madde)' hükümleri neyin göstergesidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Monarşik (Padişahlık) gücün anayasadan üstün tutulduğunun<hr><small><strong>Açıklama:</strong> Birinci Meşrutiyet dönemindeki anayasada, halkın meclisi (Mebusan) açılsa da son söz ve meclisi kapatma yetkisi padişaha (II. Abdülhamit) aitti. Gerçek demokrasi 1909 değişiklikleriyle (II. Meşrutiyet) gelmiştir.</small>"
+        },
+        {
+            "q": "Fatih Sultan Mehmet'in İstanbul'u fethinden sonra Ortodoks Patrikhanesi'ni himaye etmesi ve Ermeni/Yahudi cemaatlerine özerklik vermesinin temel DİPLOMATİK amacı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Hristiyan (Haçlı) birliğini parçalamak<hr><small><strong>Açıklama:</strong> Fatih, Ortodoksları koruması altına alarak Katolik-Ortodoks birleşmesini engellemiş, olası Haçlı ittifaklarının önüne geçmeyi hedeflemiştir.</small>"
+        },
+        {
+            "q": "Osmanlı Devleti'nde esnaf arasındaki haksız rekabeti önlemek ve halkın temel tüketim mallarını uygun fiyata almasını sağlamak için devletin fiyatlara müdahale etmesine (fiyat belirlemesine) ne denir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Narh Sistemi<hr><small><strong>Açıklama:</strong> Narh, devletin belirlediği tavan ve taban fiyatlardır. Kadı ve muhtesipler tarafından denetlenirdi. Amaç enflasyonu önlemek ve karaborsacılığın önüne geçmektir.</small>"
+        },
+        {
             "q": "Osmanlı Devleti'nde esnaf teşkilatı olan Lonca sisteminde dükkan açma ruhsatına (iznine) ne ad verilirdi?",
             "a": "Gedik <br><i>(2022 KPSS Lisans)</i><hr><small><strong>Açıklama:</strong> Narh ise üretilen malın kalitesini ve tavan/taban fiyatını belirleyen sistemdir.</small>"
         },
@@ -2422,6 +3452,46 @@
     ],
     "cikmis_inkilap": [
         {
+            "q": "Mustafa Kemal'in Havza Genelgesi'nde halktan İzmir'in işgalini mitinglerle protesto etmelerini istemesinin TEMEL AMACI nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Milli bilinci uyandırmak ve işgallere karşı ulusal bir heyecan yaratmak<hr><small><strong>Açıklama:</strong> Samsun'dan sonra yayımlanan Havza Genelgesi, halkı pasif durumdan aktif duruma (protesto) geçiren, Kurtuluş Savaşı'nın ilk ulusal uyanış belgesidir.</small>"
+        },
+        {
+            "q": "Milli Mücadele döneminde, Sivas Kongresi'nde kurulan İrade-i Milliye gazetesinin ve Ankara'da kurulan Hakimiyet-i Milliye ile Anadolu Ajansı'nın ORTAK GÖREVİ nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Halkı doğru bilgilendirmek ve Milli Mücadele'nin haklılığını dünyaya duyurmak<hr><small><strong>Açıklama:</strong> İşgalcilerin ve İstanbul Hükümeti'nin yaptığı yalan propagandaları çürütmek, ulusal bağımsızlık fikrini yaymak için basının gücü kullanılmıştır.</small>"
+        },
+        {
+            "q": "TBMM'nin Sevr Antlaşması'nı imzalayanları 'Vatan Haini' ilan etmesinin hukuki (yasama) dayanağı hangi kanundur?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Hıyanet-i Vataniye Kanunu<hr><small><strong>Açıklama:</strong> TBMM'ye karşı çıkan isyanları bastırmak ve Sevr'i imzalayanları cezalandırmak için çıkarılan bu kanun, İstiklal Mahkemeleri tarafından uygulanmıştır.</small>"
+        },
+        {
+            "q": "Lozan Barış Antlaşması'nda Türkiye'nin KESİNLİKLE TAVİZ VERMEDİĞİ ve egemenlik haklarını korumak için doğrudan reddettiği İKİ KONU nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Ermeni Yurdu (Doğu Anadolu'da devlet) ve Kapitülasyonlar<hr><small><strong>Açıklama:</strong> Mustafa Kemal, İsmet İnönü heyetine bu iki konuda asla taviz verilmemesini, gerekirse masadan kalkılmasını emretmiştir. İki konu da Türkiye'nin tam bağımsızlık ilkesinin kırmızı çizgisidir.</small>"
+        },
+        {
+            "q": "Yeni Türk Devleti'nde, 1928 yılında 'Devletin dini İslam'dır' maddesinin anayasadan çıkarılması hangi ilke doğrultusunda atılmış bir adımdır?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Laiklik<hr><small><strong>Açıklama:</strong> 1924 Anayasası'nda yer alan bu madde, 1928'de çıkarılarak devletin dinler karşısında tarafsız kalması sağlanmış, laiklik yolunda en büyük adımlardan biri atılmıştır.</small>"
+        },
+        {
+            "q": "Erzurum Kongresi'nde kabul edilen 'Kuvay-ı Milliye'yi amil (etkin), Milli İradeyi hakim kılmak esastır' maddesi ileride hangi sisteme (rejime) geçileceğinin ilk açık işaretidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Cumhuriyet Yönetimine (Milli Egemenlik)<hr><small><strong>Açıklama:</strong> Milli irade vurgusu, padişahlık/saltanat sisteminin yerine halkın kendi kendini yöneteceği bir sistemin (Cumhuriyet) kurulacağının en büyük kanıtıdır.</small>"
+        },
+        {
+            "q": "Kurtuluş Savaşı'nda, doğu sınırımızı GÜVENCE altına alan ve Ermenistan'ın TBMM'yi tanıdığı antlaşma hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Gümrü Antlaşması (1920)<hr><small><strong>Açıklama:</strong> Kazım Karabekir'in 15. Kolordusu'nun zaferi sonrası imzalanan Gümrü Antlaşması, TBMM'nin ilk askeri ve siyasi başarısıdır. Ermeniler Sevr'deki haklarından vazgeçmiştir.</small>"
+        },
+        {
+            "q": "Mudanya Ateşkes Antlaşması'nda İstanbul, Boğazlar ve Doğu Trakya'nın savaşılmadan TBMM'ye bırakılmasının Osmanlı Devleti açısından HUKUKİ SONUCU nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Osmanlı Devleti'nin HUKUKEN sona ermesi<hr><small><strong>Açıklama:</strong> İtilaf Devletleri'nin ateşkes görüşmelerinde İstanbul Hükümeti'ni yok sayıp başkenti (İstanbul) doğrudan TBMM'ye teslim etmesi, Osmanlı'nın hukuken bittiğini gösterir.</small>"
+        },
+        {
+            "q": "Mustafa Kemal Atatürk'ün 'Benim En Büyük Eserim' dediği gelişme aşağıdakilerden hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Türkiye Cumhuriyeti<hr><small><strong>Açıklama:</strong> Atatürk, Nutuk'ta ve konuşmalarında askeri zaferlerinden ziyade, modern ve çağdaş bir yapıya kavuşturduğu Türkiye Cumhuriyeti'ni en büyük eseri olarak nitelendirmiştir.</small>"
+        },
+        {
+            "q": "1932'de Halkevleri'nin açılması ve 1933'te Üniversite Reformu'nun yapılması ortak olarak hangi alanın geliştirilmesine yöneliktir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Eğitim ve Kültür (İnkılapçılık)<hr><small><strong>Açıklama:</strong> Halkevleri Cumhuriyet ideolojisini ve harf inkılabını halka benimsetmek (yaygın eğitim), Üniversite Reformu ise yükseköğretimi çağdaşlaştırmak (Darülfünun'dan İstanbul Üniversitesi'ne) amacıyla yapılmıştır.</small>"
+        },
+        {
             "q": "Milli Mücadele döneminde Temsil Heyeti'nin Sivas'tan ayrılarak Ankara'yı (27 Aralık 1919) merkez seçmesinin nedenleri arasında hangisi yoktur?",
             "a": "Osmanlı Başkentine (İstanbul'a) çok uzak olması <br><i>(2022 KPSS Lisans)</i><hr><small><strong>Açıklama:</strong> Tam tersine İstanbul'a (Mebusan Meclisine) yakın olması, demiryolu-telgraf ağının olması ve Batı cephesine yakınlığı Ankara'nın seçilme nedenleridir.</small>"
         },
@@ -2543,6 +3613,46 @@
         }
     ],
     "cikmis_cagdas": [
+        {
+            "q": "Soğuk Savaş döneminde, SSCB'nin nükleer füzelerini ABD'nin burnunun dibine yerleştirmesiyle 1962 yılında patlak veren ve 3. Dünya Savaşı'nın eşiğinden dönülen olayın adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Küba Füze Krizi<hr><small><strong>Açıklama:</strong> Türkiye'deki Jüpiter füzeleri ile Küba'daki SSCB füzelerinin karşılıklı sökülmesi kararıyla kriz çözülmüş ve Yumuşama (Detant) dönemi başlamıştır.</small>"
+        },
+        {
+            "q": "1991 yılında SSCB'nin dağılmasıyla birlikte, Orta Asya'da bağımsızlığını kazanan Türki Cumhuriyetlerin dillerini, kültürlerini ve ekonomik işbirliklerini geliştirmek amacıyla Türkiye önderliğinde kurulan teşkilat hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "TİKA (Türk İşbirliği ve Koordinasyon Ajansı Başkanlığı)<hr><small><strong>Açıklama:</strong> TİKA, 1992 yılında kurularak Orta Asya ve Balkanlar'daki Türk/Akraba topluluklarına kalkınma yardımları sağlayan en önemli devlet kurumumuz olmuştur.</small>"
+        },
+        {
+            "q": "İsrail Devleti'nin 1948 yılında kurulmasına temel teşkil eden ve İngiltere tarafından yayımlanan tarihi belge hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Balfour Deklarasyonu (1917)<hr><small><strong>Açıklama:</strong> İngiltere Dışişleri Bakanı Arthur Balfour'un Siyonist federasyona gönderdiği bu mektup, Filistin topraklarında bir Yahudi devleti kurulmasının ilk diplomatik onay belgesidir.</small>"
+        },
+        {
+            "q": "İkinci Dünya Savaşı yıllarında (1939-1945), Türkiye'de savaşa girmememize rağmen ekonomik sıkıntıları ve karaborsacılığı önlemek, zenginleşen savaş zenginlerinden vergi almak için çıkarılan kanun hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Varlık Vergisi Kanunu (1942)<hr><small><strong>Açıklama:</strong> Şükrü Saracoğlu hükümeti döneminde çıkarılan bu kanun, ödeyemeyenlerin Aşkale'ye (Erzurum) çalışma kamplarına gönderilmesiyle çok eleştirilmiş ve 1944'te kaldırılmıştır.</small>"
+        },
+        {
+            "q": "ABD'nin, 1957 yılında Ortadoğu'da komünizmin yayılmasını engellemek ve bu bölgedeki ülkelere ekonomik/askeri yardım yapmak amacıyla yayımladığı belgenin adı nedir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Eisenhower Doktrini<hr><small><strong>Açıklama:</strong> Truman doktrini (Yunanistan/Türkiye) ve Marshall Planı (Avrupa) gibi, Eisenhower Doktrini de spesifik olarak Ortadoğu'yu Sovyet nüfuzundan korumayı hedeflemiştir.</small>"
+        },
+        {
+            "q": "Yugoslavya'nın dağılması sürecinde, 1992-1995 yılları arasında Bosna'da yaşanan soykırımı bitiren ve Bosna Hersek'in bağımsızlığını sağlayan antlaşma hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Dayton Antlaşması (1995)<hr><small><strong>Açıklama:</strong> ABD'nin Ohio eyaletinde imzalanan bu antlaşma, Bilge Kral Aliya İzzetbegoviç'in önderliğindeki Boşnakların katliamdan kurtulmasını sağlamıştır.</small>"
+        },
+        {
+            "q": "Atatürk'ün 'Kırk asırlık Türk yurdu düşman elinde esir kalamaz' diyerek 1939 yılında anavatan Türkiye'ye katılımını sağladığı son toprak parçası neresidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Hatay (İskenderun Sancağı)<hr><small><strong>Açıklama:</strong> 1938'de bağımsız Hatay Devleti kurulmuş (Cumhurbaşkanı Tayfur Sökmen), 1939'da ise meclis kararıyla Türkiye'ye katılmıştır. Atatürk vefat ettiği için Hatay'ın anavatana katıldığını görememiştir.</small>"
+        },
+        {
+            "q": "İkinci Dünya Savaşı öncesinde, İtalya'nın Akdeniz'i 'Bizim Deniz' (Mare Nostrum) yapma hayali ve Almanya'nın 'Hayat Alanı' (Lebensraum) politikasına karşı Türkiye'nin batı sınırını güvenceye aldığı pakt hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Balkan Antantı (1934)<hr><small><strong>Açıklama:</strong> Türkiye, Yunanistan, Yugoslavya ve Romanya (Tayyar şifresi) katılmıştır. Doğu sınırını güvenceye almak için ise 1937'de Sadabat Paktı kurulmuştur.</small>"
+        },
+        {
+            "q": "Tarihte ilk defa bir ABD başkanının Çin'i ziyaret ederek (Nixon, 1972) ABD-Çin ilişkilerini normalleştirmesi sürecine (Ping-Pong Diplomasisi) zemin hazırlayan spor dalı hangisidir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Masa Tenisi (Ping-Pong)<hr><small><strong>Açıklama:</strong> ABD masa tenisi takımının Çin'e davet edilmesiyle başlayan yumuşama süreci, Soğuk Savaş döneminde Çin-Sovyet ayrılığından yararlanan ABD'nin başarılı bir diplomatik hamlesidir.</small>"
+        },
+        {
+            "q": "1945 yılında San Francisco Konferansı ile kurulan Birleşmiş Milletler (BM) Teşkilatı'nda 'Veto Hakkı'na sahip olan 5 daimi üye (FİRÇA) hangi devletlerdir?<span style='position:absolute; top:10px; right:10px; font-size:0.75rem; color:var(--text-muted); opacity:0.6; font-weight:normal;'>ÖSYM Çıkmış</span>",
+            "a": "Fransa, İngiltere, Rusya (SSCB), Çin, ABD<hr><small><strong>Açıklama:</strong> Birleşmiş Milletler Güvenlik Konseyi'nin bu 5 daimi üyesi, alınan herhangi bir kararı tek başlarına veto etme (reddetme) hakkına sahiptir. (BM'nin demokratik olmayan yapısı)</small>"
+        },
         {
             "q": "Türkiye'nin 1952 yılında NATO'ya üye olmasını hızlandıran, ABD'ye ve Batı ittifakına olan sadakatini gösterdiği (asker gönderdiği) savaş hangisidir?",
             "a": "Kore Savaşı <br><i>(2022 KPSS Lisans)</i><hr><small><strong>Açıklama:</strong> Tuğgeneral Tahsin Yazıcı komutasındaki Şimal Yıldızı (Türk Tugayı) Kunuri'de büyük kahramanlık göstermiştir.</small>"
@@ -2683,7 +3793,20 @@
         let currentUnit = "islamiyet_oncesi";
         let currentIndex = 0;
         let isFlipped = false;
+        
+        flashcardsData['arama_sonuclari'] = [];
+        unitNames['arama_sonuclari'] = "Arama Sonuçları";
+        unitNames['yeni_nesil_zor'] = "PİKOS Özel Seçmece Zor Sorular";
+
         let currentQuestions = [];
+
+        // Load favorites from local storage
+        let savedFavorites = JSON.parse(localStorage.getItem('kpss_favorites')) || [];
+        flashcardsData['favoriler'] = savedFavorites;
+
+        // Ensure unitNames has favoriler
+        unitNames['favoriler'] = "Favorilerim (Yıldızlananlar)";
+
 
         const flashcardEl = document.getElementById('flashcard');
         const questionEl = document.getElementById('cardQuestion');
@@ -2715,6 +3838,56 @@
             document.getElementById('flashcardMode').style.display = 'none';
             document.getElementById('backBtn').style.display = 'none';
             document.getElementById('homeMode').style.display = 'grid';
+        }
+
+        
+        function handleSearch(event) {
+            if (event.key === 'Enter') {
+                executeSearch();
+            }
+        }
+
+        function executeSearch() {
+            const input = document.getElementById('searchInput');
+            const term = input.value.trim().toLowerCase();
+            
+            if (!term) {
+                alert("Lütfen aramak için bir kelime veya kavram yazın.");
+                return;
+            }
+
+            // Define categories to search (exclude special ones)
+            const excludedKeys = ['favoriler', 'arama_sonuclari', 'karisik'];
+            let results = [];
+            
+            for (let key in flashcardsData) {
+                if (excludedKeys.includes(key)) continue;
+                
+                const questions = flashcardsData[key] || [];
+                for (let i = 0; i < questions.length; i++) {
+                    const qText = (questions[i].q || "").toLowerCase();
+                    const aText = (questions[i].a || "").toLowerCase();
+                    
+                    if (qText.includes(term) || aText.includes(term)) {
+                        // Prevent duplicates
+                        const exists = results.some(r => r.q === questions[i].q && r.a === questions[i].a);
+                        if (!exists) {
+                            results.push(questions[i]);
+                        }
+                    }
+                }
+            }
+
+            if (results.length === 0) {
+                alert(`"${term}" kelimesi ile eşleşen bir sonuç bulunamadı.`);
+                return;
+            }
+
+            flashcardsData['arama_sonuclari'] = results;
+            alert(`"${term}" kelimesi toplam ${results.length} soruda bulundu. Sonuçlara yönlendiriliyorsunuz.`);
+            
+            input.value = ''; // clear input
+            startCategory('arama_sonuclari');
         }
 
         function startCategory(cat) {
@@ -2778,7 +3951,69 @@
                 answerEl.innerHTML = card.a;
                 questionEl.style.opacity = 1;
                 answerEl.style.opacity = 1;
+                updateStarUI();
             }, 150);
+        }
+
+        
+        function toggleFavorite(event) {
+            // Prevent card flip when clicking the star
+            event.stopPropagation();
+            
+            const card = currentQuestions[currentIndex];
+            const favIndex = flashcardsData['favoriler'].findIndex(f => f.q === card.q && f.a === card.a);
+            
+            if (favIndex === -1) {
+                // Add to favorites
+                flashcardsData['favoriler'].push(card);
+            } else {
+                // Remove from favorites
+                flashcardsData['favoriler'].splice(favIndex, 1);
+                // If we are currently studying favorites, we might want to remove it from current view too
+                if (currentUnit === 'favoriler') {
+                    currentQuestions.splice(currentIndex, 1);
+                    if (currentQuestions.length === 0) {
+                        alert("Favorilerinizde soru kalmadı. Anasayfaya yönlendiriliyorsunuz.");
+                        showHome();
+                        return;
+                    }
+                    if (currentIndex >= currentQuestions.length) currentIndex--;
+                    if (isFlipped) {
+                        flashcardEl.classList.remove('is-flipped');
+                        isFlipped = false;
+                        setTimeout(() => { loadCard(); updateProgress(); }, 300);
+                        saveFavorites();
+                        return;
+                    } else {
+                        loadCard();
+                        updateProgress();
+                        saveFavorites();
+                        return;
+                    }
+                }
+            }
+            
+            saveFavorites();
+            updateStarUI();
+            updateCategoryCounts();
+        }
+
+        function saveFavorites() {
+            localStorage.setItem('kpss_favorites', JSON.stringify(flashcardsData['favoriler']));
+        }
+
+        function updateStarUI() {
+            if (currentQuestions.length === 0) return;
+            const card = currentQuestions[currentIndex];
+            const isFav = flashcardsData['favoriler'].some(f => f.q === card.q && f.a === card.a);
+            const stars = document.querySelectorAll('.star-btn');
+            stars.forEach(btn => {
+                if (isFav) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
         }
 
         function flipCard() {
@@ -2821,6 +4056,36 @@
                     loadCard();
                     updateProgress();
                 }
+            }
+        }
+
+        
+        function markAsWrong() {
+            if (currentQuestions.length > 1 && currentIndex < currentQuestions.length - 1) {
+                // Remove the current card
+                const currentCard = currentQuestions.splice(currentIndex, 1)[0];
+                
+                // Calculate new position: 8 cards later
+                let newPosition = currentIndex + 8;
+                if (newPosition > currentQuestions.length) {
+                    newPosition = currentQuestions.length;
+                }
+                
+                // Insert the card at the new position
+                currentQuestions.splice(newPosition, 0, currentCard);
+                
+                if (isFlipped) {
+                    flipCard();
+                    setTimeout(() => {
+                        loadCard();
+                        updateProgress();
+                    }, 300);
+                } else {
+                    loadCard();
+                    updateProgress();
+                }
+            } else if (currentIndex === currentQuestions.length - 1) {
+                alert("Bu destedeki son sorudasınız. Tekrar etmek için 'Karıştır' butonunu kullanabilirsiniz.");
             }
         }
 
@@ -2884,6 +4149,155 @@
                 flipCard();
             }
         });
+    
+        // Pomodoro Logic
+        const WORK_TIME = 30 * 60; // 30 minutes
+        const BREAK_TIME = 6 * 60; // 6 minutes
+        
+        let pomoTimeLeft = WORK_TIME;
+        let isWorkMode = true;
+        let isRunning = false;
+        let pomoInterval = null;
+
+        function updatePomoDisplay() {
+            const minutes = Math.floor(pomoTimeLeft / 60);
+            const seconds = pomoTimeLeft % 60;
+            document.getElementById('pomoTime').textContent = 
+                String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+        }
+
+        function togglePomodoro() {
+            if (isRunning) {
+                clearInterval(pomoInterval);
+                isRunning = false;
+                document.getElementById('pomoPlayIcon').style.display = 'block';
+                document.getElementById('pomoPauseIcon').style.display = 'none';
+            } else {
+                isRunning = true;
+                document.getElementById('pomoPlayIcon').style.display = 'none';
+                document.getElementById('pomoPauseIcon').style.display = 'block';
+                pomoInterval = setInterval(() => {
+                    pomoTimeLeft--;
+                    updatePomoDisplay();
+                    
+                    if (pomoTimeLeft <= 0) {
+                        clearInterval(pomoInterval);
+                        isRunning = false;
+                        document.getElementById('pomoPlayIcon').style.display = 'block';
+                        document.getElementById('pomoPauseIcon').style.display = 'none';
+                        
+                        if (isWorkMode) {
+                            alert("Süre bitti! Harika bir odaklanmayla 30 dakikayı tamamladınız. Şimdi 6 dakikalık mola zamanı.");
+                            isWorkMode = false;
+                            pomoTimeLeft = BREAK_TIME;
+                            document.getElementById('pomoLabel').textContent = "MOLA (6 DK)";
+                            document.getElementById('pomodoro').classList.add('break-mode');
+                        } else {
+                            alert("Mola bitti! Haydi odaklanıp tekrar çalışmaya başlayalım.");
+                            isWorkMode = true;
+                            pomoTimeLeft = WORK_TIME;
+                            document.getElementById('pomoLabel').textContent = "ÇALIŞMA (30 DK)";
+                            document.getElementById('pomodoro').classList.remove('break-mode');
+                        }
+                        updatePomoDisplay();
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetPomodoro() {
+            clearInterval(pomoInterval);
+            isRunning = false;
+            isWorkMode = true;
+            pomoTimeLeft = WORK_TIME;
+            document.getElementById('pomoPlayIcon').style.display = 'block';
+            document.getElementById('pomoPauseIcon').style.display = 'none';
+            document.getElementById('pomoLabel').textContent = "ÇALIŞMA (30 DK)";
+            document.getElementById('pomodoro').classList.remove('break-mode');
+            updatePomoDisplay();
+        }
+
+        // Progress Bar Drag & Seek functionality
+        const progressBgEl = document.querySelector('.progress-bar-bg');
+        let isDraggingProgress = false;
+
+        function seekProgress(e) {
+            if(!currentQuestions || currentQuestions.length === 0) return;
+            const rect = progressBgEl.getBoundingClientRect();
+            const clientX = e.touches && e.touches.length > 0 ? e.touches[0].clientX : e.clientX;
+            let x = clientX - rect.left;
+            x = Math.max(0, Math.min(x, rect.width));
+            const percentage = x / rect.width;
+            
+            // Map percentage to an index (0 to length - 1)
+            let targetIndex = Math.floor(percentage * currentQuestions.length);
+            
+            // Edge case: exactly 100% gives an out of bounds index
+            if(targetIndex === currentQuestions.length) {
+                targetIndex = currentQuestions.length - 1;
+            }
+
+            if(targetIndex !== currentIndex && targetIndex >= 0 && targetIndex < currentQuestions.length) {
+                currentIndex = targetIndex;
+                
+                // Flip back if currently flipped
+                const flashcardEl = document.getElementById('flashcard');
+                if (isFlipped) {
+                    flashcardEl.classList.remove('is-flipped');
+                    isFlipped = false;
+                    setTimeout(() => {
+                        loadCard();
+                        updateProgress();
+                    }, 300);
+                } else {
+                    loadCard();
+                    updateProgress();
+                }
+            }
+        }
+
+        progressBgEl.addEventListener('mousedown', (e) => {
+            isDraggingProgress = true;
+            seekProgress(e);
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if(isDraggingProgress) seekProgress(e);
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDraggingProgress = false;
+        });
+
+        progressBgEl.addEventListener('touchstart', (e) => {
+            isDraggingProgress = true;
+            seekProgress(e);
+        }, {passive: true});
+
+        window.addEventListener('touchmove', (e) => {
+            if(isDraggingProgress) seekProgress(e);
+        }, {passive: true});
+
+        window.addEventListener('touchend', () => {
+            isDraggingProgress = false;
+        });
+
     </script>
+
+    <!-- Pomodoro Widget -->
+    <div id="pomodoro" class="pomodoro-container">
+        <div id="pomoLabel" class="pomo-label">ÇALIŞMA (30 DK)</div>
+        <div id="pomoTime" class="pomo-time">30:00</div>
+        <div class="pomo-controls">
+            <button class="pomo-btn" onclick="togglePomodoro()" id="pomoToggleBtn" title="Başlat/Duraklat">
+                <svg id="pomoPlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                <svg id="pomoPauseIcon" style="display:none;" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+            </button>
+            <button class="pomo-btn" onclick="resetPomodoro()" title="Sıfırla">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+            </button>
+        </div>
+    </div>
+
 </body>
 </html>
