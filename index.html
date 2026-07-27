@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PİKOS SORU BANKASI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
     <style>
@@ -323,11 +323,20 @@
         }
 
         @media (max-width: 640px) {
-            h1 { font-size: 2rem; }
-            .flashcard-container { height: 400px; }
-            .card-content { font-size: 1.2rem; }
-            .controls { flex-direction: column; width: 100%; max-width: 300px; }
+            body { padding: 1rem 0.5rem; }
+            h1 { font-size: 1.5rem; }
+            p.subtitle { font-size: 0.95rem; }
+            .flashcard-container { height: 450px; }
+            .card-face { padding: 1.25rem; }
+            .card-content { font-size: 1.1rem; }
+            .card-back .card-content { font-size: 1rem; }
+            .card-back .card-content small { font-size: 0.85rem; }
+            .controls { flex-direction: column; width: 100%; max-width: 100%; padding: 0 10px; }
             select { width: 100%; }
+            .navigation { gap: 0.75rem; flex-wrap: wrap; justify-content: center; }
+            .btn { padding: 0.6rem 1.2rem; font-size: 0.9rem; }
+            .home-grid { grid-template-columns: 1fr; padding: 0 10px; }
+            .progress-container { margin-top: 1.5rem; padding: 0 10px; }
         }
     
         /* Home Grid */
