@@ -4407,6 +4407,10 @@
         function dragPomo(e) {
             if (!isDraggingPomo) return;
             
+            if (e.cancelable) {
+                e.preventDefault();
+            }
+            
             let currentX, currentY;
             if (e.type === 'touchmove') {
                 currentX = e.touches[0].clientX;
