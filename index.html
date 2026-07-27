@@ -3898,6 +3898,7 @@
         }
 
         function showHome() {
+            document.body.style.backgroundImage = "linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)";
             updateCategoryCounts();
             document.getElementById('flashcardMode').style.display = 'none';
             document.getElementById('backBtn').style.display = 'none';
@@ -3989,6 +3990,20 @@
             currentUnit = unitSelect.value;
             currentIndex = 0;
             unitNameDisplay.textContent = unitNames[currentUnit];
+            
+            if (currentUnit === 'yeni_nesil_zor') {
+                document.body.style.backgroundImage = "url('winx_bloom.png')";
+                document.body.style.backgroundSize = "contain";
+                document.body.style.backgroundRepeat = "no-repeat";
+                document.body.style.backgroundPosition = "center center";
+                document.body.style.backgroundAttachment = "fixed";
+                document.body.style.backgroundColor = "#0f172a"; 
+            } else {
+                document.body.style.backgroundImage = "linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%)";
+                document.body.style.backgroundSize = "cover";
+                document.body.style.backgroundRepeat = "no-repeat";
+            }
+            
             loadQuestions();
             
             if(isFlipped) {
