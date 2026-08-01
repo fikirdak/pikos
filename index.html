@@ -846,42 +846,413 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
         }
-
-        .auth-submit-btn:active {
+        .auth-submit-btn:active {
             transform: translateY(0);
         }
 
-        /* Lock / Logout Header Button */
-        .header-lock-btn {
+        /* Top Navigation Action Bar */
+        .top-nav-bar {
             position: absolute;
             top: 1.5rem;
             left: 2rem;
-            background: rgba(30, 41, 59, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--text-muted);
-            padding: 0.5rem 0.9rem;
-            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 100;
+        }
+
+        .top-nav-btn {
+            background: rgba(30, 41, 59, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-main);
+            padding: 0.55rem 1rem;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             gap: 0.5rem;
             font-size: 0.85rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
             cursor: pointer;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            z-index: 100;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .header-lock-btn:hover {
-            background: rgba(239, 68, 68, 0.15);
+
+        .top-nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .top-nav-btn.lock-btn:hover {
+            background: rgba(239, 68, 68, 0.18);
             border-color: rgba(239, 68, 68, 0.4);
             color: #f87171;
+        }
+
+        .top-nav-btn.notes-btn {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.85), rgba(37, 99, 235, 0.2));
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+
+        .top-nav-btn.notes-btn:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: rgba(96, 165, 250, 0.55);
+            color: #60a5fa;
+        }
+
+        .nav-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-size: 0.72rem;
+            padding: 0.1rem 0.5rem;
+            border-radius: 12px;
+            font-weight: 700;
+        }
+
+        /* Shared Notepad Floating Button */
+        .notepad-fab {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.92), rgba(15, 23, 42, 0.96));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #f1f5f9;
+            padding: 0.75rem 1.25rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            font-family: 'Outfit', sans-serif;
+            cursor: pointer;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 9999;
+        }
+
+        .notepad-fab:hover {
+            transform: translateY(-3px) scale(1.03);
+            border-color: rgba(96, 165, 250, 0.6);
+            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.7), 0 0 25px rgba(96, 165, 250, 0.5);
+            color: #60a5fa;
+        }
+
+        .notepad-fab-icon {
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .notepad-fab-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.15rem 0.55rem;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        /* Notepad Modal Overlay */
+        .notepad-overlay {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            background: rgba(15, 23, 42, 0.85) !important;
+            backdrop-filter: blur(20px) !important;
+            -webkit-backdrop-filter: blur(20px) !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 100000 !important;
+            padding: 1.5rem !important;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.3s;
+        }
+
+        .notepad-overlay.hidden {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        .notepad-modal {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 40px rgba(59, 130, 246, 0.2);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 580px;
+            max-height: 88vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: authScaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .notepad-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .notepad-title-box {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notepad-header-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(139, 92, 246, 0.3));
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .notepad-header-text h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0;
+        }
+
+        .notepad-header-text p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin: 0.15rem 0 0 0;
+        }
+
+        .notepad-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .notepad-icon-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .notepad-icon-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #60a5fa;
+            transform: scale(1.05);
+        }
+
+        .notepad-icon-btn.spinning svg {
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        .notepad-body {
+            padding: 1.25rem 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            flex: 1;
+        }
+
+        .notepad-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            background: rgba(15, 23, 42, 0.6);
+            padding: 1.1rem;
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .notepad-textarea {
+            width: 100%;
+            min-height: 85px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 0.85rem;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            resize: vertical;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .notepad-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        .notepad-submit-btn {
+            align-self: flex-end;
+            padding: 0.7rem 1.35rem;
+            border-radius: 12px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            font-weight: 600;
+            font-size: 0.9rem;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .notepad-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+        }
+
+        .notepad-submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .notepad-list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .notepad-list-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .notepad-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            position: relative;
+            transition: all 0.2s ease;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .notepad-card:hover {
+            border-color: rgba(96, 165, 250, 0.4);
+            background: rgba(15, 23, 42, 0.9);
             transform: translateY(-2px);
         }
+
+        .notepad-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .notepad-card-date {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: #94a3b8;
+        }
+
+        .notepad-delete-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.75rem;
+            opacity: 0.75;
+            transition: all 0.2s;
+        }
+
+        .notepad-delete-btn:hover {
+            opacity: 1;
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .notepad-card-content {
+            color: var(--text-main);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .notepad-empty {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
         @media (max-width: 640px) {
-            .header-lock-btn {
+            .top-nav-bar {
                 top: 0.75rem;
                 left: 0.75rem;
-                padding: 0.4rem 0.6rem;
+                gap: 0.5rem;
+            }
+            .top-nav-btn {
+                padding: 0.4rem 0.65rem;
                 font-size: 0.75rem;
+                border-radius: 10px;
+            }
+            .notepad-fab {
+                bottom: 1.25rem;
+                left: 1.25rem;
+                padding: 0.6rem 1rem;
+                font-size: 0.85rem;
+            }
+            .notepad-modal {
+                max-height: 92vh;
+            }
+            .notepad-body {
+                padding: 1rem;
             }
         }
 
@@ -901,7 +1272,7 @@
             <div class="auth-input-wrapper">
                 <input type="password" id="authPasswordInput" class="auth-input" placeholder="Giriş şifresi..." autocomplete="current-password" onkeydown="handleAuthKey(event)">
                 <button type="button" class="auth-toggle-pwd" onclick="toggleAuthPasswordVisibility()" title="Şifreyi Göster/Gizle">
-                    <svg id="authEyeOpen" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <svg id="authEyeOpen" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     <svg id="authEyeClosed" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>
                 </button>
             </div>
@@ -920,11 +1291,70 @@
         </div>
     </div>
 
-    <!-- Lock / Logout Button -->
-    <button class="header-lock-btn" onclick="lockApp()" title="Uygulamayı Kilitle">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-        <span>Kilitle</span>
+    <!-- Top Action Navigation Bar -->
+    <div class="top-nav-bar">
+        <button class="top-nav-btn lock-btn" onclick="lockApp()" title="Uygulamayı Kilitle">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+            <span>Kilitle</span>
+        </button>
+        <button class="top-nav-btn notes-btn" onclick="openNotepad()" title="Ortak Not Defteri">
+            <span style="font-size: 1rem;">📝</span>
+            <span>Not Defteri</span>
+            <span id="topNotepadBadge" class="nav-badge" style="display:none;">0</span>
+        </button>
+    </div>
+
+    <!-- Floating Notepad Button (Bottom Left) -->
+    <button id="notepadFab" class="notepad-fab" onclick="openNotepad()" title="Ortak Not Defterini Aç">
+        <span class="notepad-fab-icon">📝</span>
+        <span>Not Defteri</span>
+        <span id="notepadBadge" class="notepad-fab-badge" style="display:none;">0</span>
     </button>
+
+    <!-- Shared Notepad Modal Overlay -->
+    <div id="notepadOverlay" class="notepad-overlay hidden" onclick="handleNotepadOverlayClick(event)">
+        <div class="notepad-modal">
+            <div class="notepad-header">
+                <div class="notepad-title-box">
+                    <div class="notepad-header-icon">📝</div>
+                    <div class="notepad-header-text">
+                        <h3>Ortak Not Defteri</h3>
+                        <p>Tüm kullanıcılar tarafından paylaşılan ortak notlar</p>
+                    </div>
+                </div>
+                <div class="notepad-header-actions">
+                    <button id="notepadRefreshBtn" class="notepad-icon-btn" onclick="fetchNotes(true)" title="Notları Yenile">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                    </button>
+                    <button class="notepad-icon-btn" onclick="closeNotepad()" title="Kapat">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="notepad-body">
+                <!-- Add Note Form -->
+                <div class="notepad-form">
+                    <textarea id="noteInput" class="notepad-textarea" placeholder="Buraya sınavla ilgili önemli bir not, soru veya hatırlatma yazın..." maxlength="1000"></textarea>
+                    <button id="noteSubmitBtn" class="notepad-submit-btn" onclick="addNote()">
+                        <span>Notu Paylaş</span>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    </button>
+                </div>
+
+                <!-- Notes List -->
+                <div class="notepad-list-container">
+                    <div class="notepad-list-title">
+                        <span>Paylaşılan Notlar</span>
+                        <span id="notesCountLabel" style="font-size:0.75rem; color:#60a5fa;">0 Not</span>
+                    </div>
+                    <div id="notesList">
+                        <!-- Notes injected here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Ambient Background -->
     <div class="blob blob-1"></div>
@@ -4556,10 +4986,218 @@
             if (errorMsg) errorMsg.classList.remove('visible');
         }
 
+        // Shared Cloud Notepad Logic
+        const NOTEPAD_CLOUD_URL = "https://jsonblob.com/api/jsonBlob/019fbdf0-a2b5-78af-8c01-704f6118f78a";
+        let cachedNotes = [];
+        let isFetchingNotes = false;
+
+        function openNotepad() {
+            const overlay = document.getElementById('notepadOverlay');
+            overlay.classList.remove('hidden');
+            fetchNotes(false);
+            setTimeout(() => {
+                const noteInput = document.getElementById('noteInput');
+                if (noteInput) noteInput.focus();
+            }, 250);
+        }
+
+        function closeNotepad() {
+            const overlay = document.getElementById('notepadOverlay');
+            overlay.classList.add('hidden');
+        }
+
+        function handleNotepadOverlayClick(e) {
+            if (e.target.id === 'notepadOverlay') {
+                closeNotepad();
+            }
+        }
+
+        function updateNotesBadge() {
+            const badge = document.getElementById('notepadBadge');
+            const topBadge = document.getElementById('topNotepadBadge');
+            const count = cachedNotes.length;
+            
+            [badge, topBadge].forEach(b => {
+                if (b) {
+                    if (count > 0) {
+                        b.textContent = count;
+                        b.style.display = 'inline-block';
+                    } else {
+                        b.style.display = 'none';
+                    }
+                }
+            });
+
+            const countLabel = document.getElementById('notesCountLabel');
+            if (countLabel) countLabel.textContent = `${count} Not`;
+        }
+
+        function renderNotesList() {
+            const listEl = document.getElementById('notesList');
+            if (!listEl) return;
+
+            updateNotesBadge();
+
+            if (!cachedNotes || cachedNotes.length === 0) {
+                listEl.innerHTML = `
+                    <div class="notepad-empty">
+                        <div style="font-size: 2rem;">📝</div>
+                        <p>Henüz paylaşılmış bir not yok.</p>
+                        <span style="font-size: 0.8rem; color: var(--text-muted);">Yukarıdaki alandan ilk notu hemen ekleyebilirsiniz!</span>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = cachedNotes.map((note) => `
+                <div class="notepad-card" id="noteCard-${note.id}">
+                    <div class="notepad-card-header">
+                        <span class="notepad-card-date">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            ${escapeHtml(note.date || 'Tarih belirtilmedi')}
+                        </span>
+                        <button class="notepad-delete-btn" onclick="deleteNote('${note.id}')" title="Bu notu sil">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                            Sil
+                        </button>
+                    </div>
+                    <div class="notepad-card-content">${escapeHtml(note.text)}</div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
+        async function fetchNotes(showSpinner = false) {
+            const refreshBtn = document.getElementById('notepadRefreshBtn');
+            if (showSpinner && refreshBtn) refreshBtn.classList.add('spinning');
+            
+            // Try loading from local storage first for speed
+            try {
+                const local = localStorage.getItem('pikos_cached_notes');
+                if (local && (!cachedNotes || cachedNotes.length === 0)) {
+                    cachedNotes = JSON.parse(local);
+                    renderNotesList();
+                }
+            } catch(e) {}
+
+            try {
+                isFetchingNotes = true;
+                const response = await fetch(NOTEPAD_CLOUD_URL, {
+                    headers: { 'Accept': 'application/json' },
+                    cache: 'no-cache'
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    if (Array.isArray(data.notes)) {
+                        cachedNotes = data.notes;
+                        localStorage.setItem('pikos_cached_notes', JSON.stringify(cachedNotes));
+                        renderNotesList();
+                    }
+                }
+            } catch (err) {
+                console.warn('Cloud notes fetch warning:', err);
+            } finally {
+                isFetchingNotes = false;
+                if (refreshBtn) refreshBtn.classList.remove('spinning');
+            }
+        }
+
+        async function addNote() {
+            const textarea = document.getElementById('noteInput');
+            const submitBtn = document.getElementById('noteSubmitBtn');
+            const text = (textarea.value || '').trim();
+
+            if (!text) {
+                textarea.focus();
+                return;
+            }
+
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const mins = String(now.getMinutes()).padStart(2, '0');
+            const dateStr = `${day}.${month}.${year} ${hours}:${mins}`;
+
+            const newNote = {
+                id: 'note_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+                text: text,
+                date: dateStr
+            };
+
+            // Optimistic update
+            cachedNotes.unshift(newNote);
+            localStorage.setItem('pikos_cached_notes', JSON.stringify(cachedNotes));
+            renderNotesList();
+            textarea.value = '';
+
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `<span>Kaydediliyor...</span>`;
+
+            try {
+                const response = await fetch(NOTEPAD_CLOUD_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ notes: cachedNotes })
+                });
+                if (!response.ok) {
+                    throw new Error('Sync failed');
+                }
+            } catch (err) {
+                console.error('Cloud note sync error:', err);
+                alert('Not kaydedilirken bir bağlantı sorunu oluştu, ancak notunuz bu cihazda saklandı.');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `
+                    <span>Notu Paylaş</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                `;
+            }
+        }
+
+        async function deleteNote(noteId) {
+            if (!confirm('Bu notu silmek istediğinize emin misiniz? (Tüm kullanıcılardan silinecektir)')) {
+                return;
+            }
+
+            cachedNotes = cachedNotes.filter(n => n.id !== noteId);
+            localStorage.setItem('pikos_cached_notes', JSON.stringify(cachedNotes));
+            renderNotesList();
+
+            try {
+                await fetch(NOTEPAD_CLOUD_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ notes: cachedNotes })
+                });
+            } catch (err) {
+                console.error('Cloud note delete sync error:', err);
+            }
+        }
+
         // Initialize on load
         window.onload = () => {
             checkAuth();
             showHome();
+            fetchNotes(false);
         };
         
         // Keyboard navigation
@@ -4567,6 +5205,16 @@
             const authOverlay = document.getElementById('authOverlay');
             if (authOverlay && !authOverlay.classList.contains('hidden')) {
                 return; // Disable flashcard shortcuts while login screen is active
+            }
+
+            const notepadOverlay = document.getElementById('notepadOverlay');
+            if (notepadOverlay && !notepadOverlay.classList.contains('hidden')) {
+                if (e.key === 'Escape') closeNotepad();
+                return; // Disable flashcard shortcuts while notepad is open
+            }
+            
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+                return;
             }
             
             if(e.key === 'ArrowRight' || e.key === 'Space') {
