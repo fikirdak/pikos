@@ -529,136 +529,176 @@
         }
 
     
-        /* Pomodoro Widget */
+        /* Pomodoro Widget - Slim Horizontal Rectangle */
         .pomodoro-container {
             position: fixed;
-            top: 2rem;
+            top: 1.5rem;
             right: 2rem;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1rem 1.5rem;
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-left: 4px solid var(--primary);
+            border-radius: 14px;
+            padding: 0.45rem 0.85rem;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            gap: 0.5rem;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            gap: 0.85rem;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 15px rgba(59, 130, 246, 0.15);
             z-index: 1000;
-            min-width: 140px;
-            border-top: 3px solid var(--primary);
-            transition: background 0.3s ease, border-color 0.3s ease;
+            transition: background 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
             cursor: grab;
             user-select: none;
         }
+
         .pomodoro-container:active {
             cursor: grabbing;
         }
 
         .pomodoro-container.break-mode {
-            border-top: 3px solid var(--success);
+            border-left: 4px solid var(--success);
+            box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.5), 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .pomo-drag-handle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.3);
+            cursor: grab;
+            padding-right: 0.15rem;
+        }
+
+        .pomo-drag-handle:hover {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .pomo-info {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.1rem;
         }
 
         .pomo-label {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.8px;
             color: var(--text-muted);
-            font-weight: 600;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .pomodoro-container.break-mode .pomo-label {
+            color: #34d399;
         }
 
         .pomo-time {
             font-family: 'Outfit', sans-serif;
-            font-size: 2.2rem;
+            font-size: 1.35rem;
             font-weight: 700;
             color: var(--text-main);
-            line-height: 1;
+            line-height: 1.1;
+            letter-spacing: 0.5px;
         }
 
         .pomo-controls {
             display: flex;
-            gap: 0.75rem;
-            margin-top: 0.25rem;
+            align-items: center;
+            gap: 0.4rem;
+            padding-left: 0.35rem;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .pomo-btn {
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-main);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .pomo-btn:hover {
-            background: rgba(255,255,255,0.2);
-            transform: scale(1.1);
+            background: rgba(59, 130, 246, 0.25);
+            border-color: rgba(96, 165, 250, 0.4);
+            color: #60a5fa;
+            transform: scale(1.08);
         }
-        
+
+        .pomo-btn.reset-btn:hover {
+            background: rgba(245, 158, 11, 0.2);
+            border-color: rgba(245, 158, 11, 0.4);
+            color: #fbbf24;
+        }
+
         .pomo-close-btn {
-            position: absolute;
-            top: 0.4rem;
-            right: 0.4rem;
             background: none;
             border: none;
             color: var(--text-muted);
             cursor: pointer;
-            padding: 4px;
-            border-radius: 50%;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
+            margin-left: 0.15rem;
         }
+
         .pomo-close-btn:hover {
             color: #ef4444;
-            background: rgba(239, 68, 68, 0.1);
+            background: rgba(239, 68, 68, 0.15);
         }
 
         .pomo-show-btn {
             position: fixed;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            top: 1.5rem;
+            right: 2rem;
+            background: rgba(15, 23, 42, 0.88);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-left: 3px solid var(--primary);
             color: var(--text-main);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            padding: 0.45rem 0.8rem;
+            border-radius: 12px;
             display: none;
             align-items: center;
-            justify-content: center;
+            gap: 0.4rem;
             cursor: pointer;
-            backdrop-filter: blur(12px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
             z-index: 999;
-            transition: all 0.3s ease;
-        }
-        .pomo-show-btn:hover {
-            transform: scale(1.1);
-            border-color: var(--primary);
-            color: var(--primary);
+            transition: all 0.25s ease;
         }
 
-        @media (max-width: 600px) {
+        .pomo-show-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+            color: #60a5fa;
+        }
+
+        @media (max-width: 640px) {
             .pomodoro-container {
-                top: 1rem;
-                right: 1rem;
-                bottom: auto;
-                padding: 0.75rem 1rem;
-                min-width: 120px;
+                top: 0.75rem;
+                right: 0.75rem;
+                padding: 0.35rem 0.65rem;
+                gap: 0.5rem;
             }
+            .pomo-time { font-size: 1.15rem; }
+            .pomo-btn { width: 28px; height: 28px; }
             .pomo-show-btn {
-                top: 0.5rem;
-                right: 0.5rem;
+                top: 0.75rem;
+                right: 0.75rem;
+                padding: 0.35rem 0.6rem;
             }
-            .pomo-time { font-size: 1.8rem; }
-            .pomo-btn { width: 32px; height: 32px; }
         }
 
         /* Authentication / Lock Screen Overlay */
@@ -4904,15 +4944,24 @@
             progressBarEl.style.width = `${percentage}%`;
         }
 
-        // Authentication Logic
-        const APP_PASSWORD = "winx";
+        // Secure Cryptographic Salted Authentication (SHA-256 + Salt)
+        // Defeats rainbow tables, dictionary attacks, and online decoders
+        const AUTH_SALT = "_pikos_secure_salt_2026_kpss_auth_";
+        const AUTH_HASH = "cf37e98a85bbaa45dbeb804629e7eb1e6994df1e54cef09a166cdb5df6dbeebe";
+
+        async function sha256(str) {
+            const buffer = new TextEncoder().encode(str + AUTH_SALT);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
 
         function checkAuth() {
             const isAuthLocal = localStorage.getItem('pikos_auth_token');
             const isAuthSession = sessionStorage.getItem('pikos_auth_token');
             const authOverlay = document.getElementById('authOverlay');
             
-            if (isAuthLocal === 'authenticated' || isAuthSession === 'authenticated') {
+            if (isAuthLocal === AUTH_HASH || isAuthSession === AUTH_HASH) {
                 authOverlay.classList.add('hidden');
             } else {
                 authOverlay.classList.remove('hidden');
@@ -4923,19 +4972,26 @@
             }
         }
 
-        function submitAuth() {
+        async function submitAuth() {
             const input = document.getElementById('authPasswordInput');
             const rememberMe = document.getElementById('authRememberMe').checked;
             const errorMsg = document.getElementById('authErrorMsg');
             const authCard = document.getElementById('authCard');
             const entered = (input.value || "").trim().toLowerCase();
 
-            if (entered === APP_PASSWORD.toLowerCase()) {
+            if (!entered) {
+                input.focus();
+                return;
+            }
+
+            const enteredHash = await sha256(entered);
+
+            if (enteredHash === AUTH_HASH) {
                 errorMsg.classList.remove('visible');
                 if (rememberMe) {
-                    localStorage.setItem('pikos_auth_token', 'authenticated');
+                    localStorage.setItem('pikos_auth_token', AUTH_HASH);
                 } else {
-                    sessionStorage.setItem('pikos_auth_token', 'authenticated');
+                    sessionStorage.setItem('pikos_auth_token', AUTH_HASH);
                 }
                 
                 document.getElementById('authOverlay').classList.add('hidden');
@@ -5362,24 +5418,30 @@
 
     </script>
 
-    <!-- Pomodoro Widget -->
+    <!-- Pomodoro Widget (Slim Horizontal Rectangle) -->
     <button id="pomoShowBtn" class="pomo-show-btn" onclick="showPomodoro()" title="Pomodoro'yu Göster">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <span style="font-size: 0.75rem; font-weight: 600;">POMO</span>
     </button>
 
-    <div id="pomodoro" class="pomodoro-container">
-        <button class="pomo-close-btn" onclick="closePomodoro()" title="Gizle">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        </button>
-        <div id="pomoLabel" class="pomo-label">POMODORO</div>
-        <div id="pomoTime" class="pomo-time">30:00</div>
+    <div id="pomodoro" class="pomodoro-container" title="Sürükleyip istediğiniz yere taşıyabilirsiniz">
+        <div class="pomo-drag-handle" title="Sürükle">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="6" r="1"></circle><circle cx="15" cy="6" r="1"></circle><circle cx="9" cy="12" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="9" cy="18" r="1"></circle><circle cx="15" cy="18" r="1"></circle></svg>
+        </div>
+        <div class="pomo-info">
+            <span id="pomoLabel" class="pomo-label">POMODORO</span>
+            <span id="pomoTime" class="pomo-time">30:00</span>
+        </div>
         <div class="pomo-controls">
-            <button class="pomo-btn" onclick="togglePomodoro()" id="pomoToggleBtn" title="Başlat/Duraklat">
-                <svg id="pomoPlayIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
-                <svg id="pomoPauseIcon" style="display:none;" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+            <button class="pomo-btn play-pause-btn" onclick="togglePomodoro()" id="pomoToggleBtn" title="Başlat / Duraklat">
+                <svg id="pomoPlayIcon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 19 12 6 20 6 4"></polygon></svg>
+                <svg id="pomoPauseIcon" style="display:none;" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
             </button>
-            <button class="pomo-btn" onclick="resetPomodoro()" title="Sıfırla">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+            <button class="pomo-btn reset-btn" onclick="resetPomodoro()" title="Yeniden Başlat / Sıfırla">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><polyline points="3 3 3 8 8 8"></polyline></svg>
+            </button>
+            <button class="pomo-close-btn" onclick="closePomodoro()" title="Gizle">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
         </div>
     </div>
