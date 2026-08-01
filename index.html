@@ -5310,11 +5310,12 @@
             }
         });
     
-        // Pomodoro Logic
-        const WORK_TIME = 30 * 60; // 30 minutes
-        const BREAK_TIME = 6 * 60; // 6 minutes
+        // Pomodoro Logic - Real-time Timestamp Synchronized (No Mobile Drift)
+        const WORK_TIME = 30 * 60; // 30 minutes in seconds
+        const BREAK_TIME = 6 * 60; // 6 minutes in seconds
         
         let pomoTimeLeft = WORK_TIME;
+        let pomoEndTime = null; // Target timestamp when session completes
         let isWorkMode = true;
         let isRunning = false;
         let pomoInterval = null;
@@ -5322,8 +5323,56 @@
         function updatePomoDisplay() {
             const minutes = Math.floor(pomoTimeLeft / 60);
             const seconds = pomoTimeLeft % 60;
-            document.getElementById('pomoTime').textContent = 
-                String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            const pomoTimeEl = document.getElementById('pomoTime');
+            if (pomoTimeEl) {
+                pomoTimeEl.textContent = 
+                    String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+            }
+        }
+
+        function checkPomoTimerTick() {
+            if (!isRunning || !pomoEndTime) return;
+            
+            const now = Date.now();
+            const diffSeconds = Math.max(0, Math.ceil((pomoEndTime - now) / 1000));
+            pomoTimeLeft = diffSeconds;
+            updatePomoDisplay();
+            
+            if (pomoTimeLeft <= 0) {
+                handlePomoComplete();
+            }
+        }
+
+        function handlePomoComplete() {
+            clearInterval(pomoInterval);
+            isRunning = false;
+            pomoEndTime = null;
+            
+            const playIcon = document.getElementById('pomoPlayIcon');
+            const pauseIcon = document.getElementById('pomoPauseIcon');
+            if (playIcon) playIcon.style.display = 'block';
+            if (pauseIcon) pauseIcon.style.display = 'none';
+            
+            const pomoEl = document.getElementById('pomodoro');
+            if (pomoEl) pomoEl.classList.add('finished-mode');
+
+            if (isWorkMode) {
+                isWorkMode = false;
+                pomoTimeLeft = BREAK_TIME;
+                const label = document.getElementById('pomoLabel');
+                if (label) label.textContent = "MOLA (6 DK)";
+                if (pomoEl) pomoEl.classList.add('break-mode');
+                updatePomoDisplay();
+                alert("Süre bitti! Harika bir odaklanmayla 30 dakikayı tamamladınız. Şimdi 6 dakikalık mola zamanı.");
+            } else {
+                isWorkMode = true;
+                pomoTimeLeft = WORK_TIME;
+                const label = document.getElementById('pomoLabel');
+                if (label) label.textContent = "POMODORO";
+                if (pomoEl) pomoEl.classList.remove('break-mode');
+                updatePomoDisplay();
+                alert("Mola bitti! Haydi odaklanıp tekrar çalışmaya başlayalım.");
+            }
         }
 
         function togglePomodoro() {
@@ -5331,43 +5380,21 @@
             if (pomoEl) pomoEl.classList.remove('finished-mode');
 
             if (isRunning) {
+                // Pause
                 clearInterval(pomoInterval);
                 isRunning = false;
+                pomoEndTime = null;
                 document.getElementById('pomoPlayIcon').style.display = 'block';
                 document.getElementById('pomoPauseIcon').style.display = 'none';
             } else {
+                // Start / Resume
                 isRunning = true;
+                pomoEndTime = Date.now() + (pomoTimeLeft * 1000);
                 document.getElementById('pomoPlayIcon').style.display = 'none';
                 document.getElementById('pomoPauseIcon').style.display = 'block';
-                pomoInterval = setInterval(() => {
-                    pomoTimeLeft--;
-                    updatePomoDisplay();
-                    
-                    if (pomoTimeLeft <= 0) {
-                        clearInterval(pomoInterval);
-                        isRunning = false;
-                        document.getElementById('pomoPlayIcon').style.display = 'block';
-                        document.getElementById('pomoPauseIcon').style.display = 'none';
-                        
-                        // Turn red when finished
-                        if (pomoEl) pomoEl.classList.add('finished-mode');
-
-                        if (isWorkMode) {
-                            alert("Süre bitti! Harika bir odaklanmayla 30 dakikayı tamamladınız. Şimdi 6 dakikalık mola zamanı.");
-                            isWorkMode = false;
-                            pomoTimeLeft = BREAK_TIME;
-                            document.getElementById('pomoLabel').textContent = "MOLA (6 DK)";
-                            pomoEl.classList.add('break-mode');
-                        } else {
-                            alert("Mola bitti! Haydi odaklanıp tekrar çalışmaya başlayalım.");
-                            isWorkMode = true;
-                            pomoTimeLeft = WORK_TIME;
-                            document.getElementById('pomoLabel').textContent = "POMODORO";
-                            pomoEl.classList.remove('break-mode');
-                        }
-                        updatePomoDisplay();
-                    }
-                }, 1000);
+                
+                clearInterval(pomoInterval);
+                pomoInterval = setInterval(checkPomoTimerTick, 500);
             }
         }
 
@@ -5376,6 +5403,7 @@
             isRunning = false;
             isWorkMode = true;
             pomoTimeLeft = WORK_TIME;
+            pomoEndTime = null;
             
             const pomoEl = document.getElementById('pomodoro');
             if (pomoEl) {
@@ -5383,11 +5411,27 @@
                 pomoEl.classList.remove('break-mode');
             }
             
-            document.getElementById('pomoPlayIcon').style.display = 'block';
-            document.getElementById('pomoPauseIcon').style.display = 'none';
-            document.getElementById('pomoLabel').textContent = "POMODORO";
+            const playIcon = document.getElementById('pomoPlayIcon');
+            const pauseIcon = document.getElementById('pomoPauseIcon');
+            if (playIcon) playIcon.style.display = 'block';
+            if (pauseIcon) pauseIcon.style.display = 'none';
+            
+            const label = document.getElementById('pomoLabel');
+            if (label) label.textContent = "POMODORO";
             updatePomoDisplay();
         }
+
+        // Mobile background sync: recalculate immediately when screen unlocks or tab is brought to focus
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && isRunning) {
+                checkPomoTimerTick();
+            }
+        });
+        window.addEventListener('focus', () => {
+            if (isRunning) {
+                checkPomoTimerTick();
+            }
+        });
 
         // Progress Bar Drag & Seek functionality
         const progressBgEl = document.querySelector('.progress-bar-bg');
