@@ -2752,6 +2752,10 @@
                     </div>
                 </div>
                 <div class="notepad-header-actions">
+                    <button class="notepad-icon-btn" onclick="exportNotesToFile()" title="Notları Metin (.txt) Olarak İndir / Yedekle">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </button>
+                    
                     <button id="notepadRefreshBtn" class="notepad-icon-btn" onclick="fetchNotes(true)" title="Notları Yenile">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
                     </button>
@@ -13417,14 +13421,47 @@
             window.location.reload();
         }
 
-        // Shared Cloud Notepad Logic
-        const NOTEPAD_CLOUD_URL = "https://jsonblob.com/api/jsonBlob/019fbdf0-a2b5-78af-8c01-704f6118f78a";
+        // ==========================================
+        // PERMANENT LOCAL-FIRST NOTEPAD ENGINE (BULLETPROOF STORAGE)
+        // ==========================================
+        const NOTEPAD_STORAGE_KEY = "pikos_kpss_user_notes";
+        const NOTEPAD_BACKUP_KEY = "pikos_kpss_user_notes_backup";
+        const NOTEPAD_CLOUD_URL = "https://jsonblob.com/api/jsonBlob/019fc3b3-229b-7025-9aac-5fa6d62b90c6";
         let cachedNotes = [];
         let isFetchingNotes = false;
 
+        // Initialize notes from local storage immediately
+        function loadLocalNotes() {
+            try {
+                const saved = localStorage.getItem(NOTEPAD_STORAGE_KEY) || localStorage.getItem(NOTEPAD_BACKUP_KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        cachedNotes = parsed;
+                        return true;
+                    }
+                }
+            } catch (e) {
+                console.error("Local notes load error:", e);
+            }
+            return false;
+        }
+
+        function saveLocalNotes() {
+            try {
+                const data = JSON.stringify(cachedNotes);
+                localStorage.setItem(NOTEPAD_STORAGE_KEY, data);
+                localStorage.setItem(NOTEPAD_BACKUP_KEY, data);
+            } catch (e) {
+                console.error("Local notes save error:", e);
+            }
+        }
+
         function openNotepad() {
             const overlay = document.getElementById('notepadOverlay');
-            overlay.classList.remove('hidden');
+            if (overlay) overlay.classList.remove('hidden');
+            loadLocalNotes();
+            renderNotesList();
             fetchNotes(false);
             makeElementDraggable(document.getElementById('pomodoro'), document.querySelector('.pomo-drag-handle'));
             updatePomoDisplay();
@@ -13436,7 +13473,7 @@
 
         function closeNotepad() {
             const overlay = document.getElementById('notepadOverlay');
-            overlay.classList.add('hidden');
+            if (overlay) overlay.classList.add('hidden');
         }
 
         function handleNotepadOverlayClick(e) {
@@ -13469,7 +13506,7 @@
             updateNotesBadge();
 
             if (!cachedNotes || cachedNotes.length === 0) {
-                listEl.innerHTML = '<div class="notepad-empty"><span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">📝</span>Henüz paylaşılan not bulunmuyor.<br>İlk notu yukarıdaki alandan siz ekleyin!</div>';
+                listEl.innerHTML = '<div class="notepad-empty"><span style="font-size: 2rem; display: block; margin-bottom: 0.5rem;">📝</span>Henüz eklenmiş bir not bulunmuyor.<br>KPSS için önemli hatırlatmaları yukarıdaki alandan ekleyebilirsiniz.</div>';
                 return;
             }
 
@@ -13498,9 +13535,11 @@
         }
 
         async function fetchNotes(showLoadingAnim = false) {
-            const listEl = document.getElementById('notesList');
-            const refreshBtn = document.getElementById('notepadRefreshBtn');
+            // First ensure local notes are loaded
+            loadLocalNotes();
+            renderNotesList();
 
+            const refreshBtn = document.getElementById('notepadRefreshBtn');
             if (showLoadingAnim && refreshBtn) {
                 refreshBtn.style.animation = 'spin 0.8s linear infinite';
             }
@@ -13513,21 +13552,33 @@
 
                 if (response.ok) {
                     const data = await response.json();
+                    let remoteNotes = [];
                     if (Array.isArray(data)) {
-                        cachedNotes = data;
+                        remoteNotes = data;
                     } else if (data && Array.isArray(data.notes)) {
-                        cachedNotes = data.notes;
+                        remoteNotes = data.notes;
                     }
-                    renderNotesList();
+                    if (remoteNotes.length > 0) {
+                        // Merge without duplicates
+                        const localIds = new Set(cachedNotes.map(n => n.id));
+                        remoteNotes.forEach(rn => {
+                            if (rn && rn.id && !localIds.has(rn.id)) {
+                                cachedNotes.push(rn);
+                                localIds.add(rn.id);
+                            }
+                        });
+                        saveLocalNotes();
+                        renderNotesList();
+                    }
                 }
             } catch (err) {
-                console.warn('Notlar buluttan çekilirken bağlantı hatası oluştu:', err);
+                // Offline or cloud endpoint unavailable: local notes are safely preserved!
             } finally {
                 if (refreshBtn) refreshBtn.style.animation = '';
             }
         }
 
-        async function addNote() {
+        function addNote() {
             const input = document.getElementById('noteInput');
             const submitBtn = document.getElementById('noteSubmitBtn');
             const text = (input ? input.value : "").trim();
@@ -13536,8 +13587,6 @@
                 if (input) input.focus();
                 return;
             }
-
-            if (submitBtn) submitBtn.disabled = true;
 
             const now = new Date();
             const dateStr = now.toLocaleDateString('tr-TR', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + 
@@ -13550,44 +13599,65 @@
             };
 
             cachedNotes.unshift(newNote);
+            saveLocalNotes();
             renderNotesList();
             if (input) input.value = '';
 
+            // Async background cloud sync if available
             try {
-                await fetch(NOTEPAD_CLOUD_URL, {
+                fetch(NOTEPAD_CLOUD_URL, {
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify(cachedNotes)
-                });
-            } catch (err) {
-                console.error('Not buluta kaydedilemedi:', err);
-            } finally {
-                if (submitBtn) submitBtn.disabled = false;
-            }
+                }).catch(() => {});
+            } catch (e) {}
         }
 
-        async function deleteNote(noteId) {
+        function deleteNote(noteId) {
             if (!confirm("Bu notu silmek istediğinize emin misiniz?")) return;
 
             cachedNotes = cachedNotes.filter(n => n.id !== noteId);
+            saveLocalNotes();
             renderNotesList();
 
             try {
-                await fetch(NOTEPAD_CLOUD_URL, {
+                fetch(NOTEPAD_CLOUD_URL, {
                     method: 'PUT',
                     headers: { 
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify(cachedNotes)
-                });
-            } catch (err) {
-                console.error('Not silme işlemi buluta iletilemedi:', err);
-            }
+                }).catch(() => {});
+            } catch (e) {}
         }
+
+        function exportNotesToFile() {
+            loadLocalNotes();
+            if (!cachedNotes || cachedNotes.length === 0) {
+                alert("İndirilecek kayıtlı not bulunmuyor.");
+                return;
+            }
+            const content = cachedNotes.map((n, i) => `=== Not ${i+1} (${n.date}) ===
+${n.text}
+
+`).join('');
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `KPSS_Notlarim_${new Date().toISOString().slice(0,10)}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(a.href);
+        }
+
+        // Initialize notes on page load immediately
+        loadLocalNotes();
+        setTimeout(updateNotesBadge, 100);
 
         // Pomodoro Timer Logic with Visibility/Background Sync
         let pomoTime = 25 * 60;
