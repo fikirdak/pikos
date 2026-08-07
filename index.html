@@ -13471,11 +13471,15 @@
         // ==========================================
         // 🔒 SECURE END-TO-END ENCRYPTED MULTI-DEVICE NOTEPAD ENGINE (SINGLE SOURCE OF TRUTH)
         // ==========================================
+        // 🔒 SECURE END-TO-END ENCRYPTED MULTI-DEVICE NOTEPAD ENGINE (TOMBSTONE SYNCHRONIZATION)
+        // ==========================================
         const NOTEPAD_STORAGE_KEY = "pikos_kpss_user_notes";
+        const NOTEPAD_DELETED_KEY = "pikos_kpss_deleted_notes";
         const NOTEPAD_BACKUP_KEY = "pikos_kpss_user_notes_backup";
         const NOTEPAD_CLOUD_ENDPOINT = "https://jsonblob.com/api/jsonBlob/019fdc7f-24be-7ebf-bd53-a66c6fd2b9c5";
         
         let cachedNotes = [];
+        let deletedNoteIds = new Set();
         let isSyncingNotes = false;
         let noteSyncInterval = null;
 
@@ -13623,12 +13627,24 @@
 
         function loadLocalNotes() {
             try {
+                // Load local tombstones
+                const savedDeleted = localStorage.getItem(NOTEPAD_DELETED_KEY);
+                if (savedDeleted) {
+                    const arr = JSON.parse(savedDeleted);
+                    if (Array.isArray(arr)) {
+                        arr.forEach(id => deletedNoteIds.add(id));
+                    }
+                }
+
+                // Known test note IDs
+                ['note_msj95xm7_hkg6v', 'note_c', 'note_b', 'note_a', 'test_1', 'test_2', 'note_0'].forEach(id => deletedNoteIds.add(id));
+
                 const saved = localStorage.getItem(NOTEPAD_STORAGE_KEY) || localStorage.getItem(NOTEPAD_BACKUP_KEY);
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed)) {
-                        // Filter out test notes
-                        cachedNotes = parsed.filter(n => n && n.id && !['note_c', 'note_b', 'note_a', 'test_1', 'test_2', 'note_0'].includes(n.id));
+                        // Purge any deleted notes
+                        cachedNotes = parsed.filter(n => n && n.id && !deletedNoteIds.has(n.id));
                         sortNotesChronologically();
                     }
                 }
@@ -13640,9 +13656,12 @@
         function saveLocalNotes() {
             sortNotesChronologically();
             try {
+                // Filter out any tombstone notes before saving
+                cachedNotes = cachedNotes.filter(n => n && n.id && !deletedNoteIds.has(n.id));
                 const serialized = JSON.stringify(cachedNotes);
                 localStorage.setItem(NOTEPAD_STORAGE_KEY, serialized);
                 localStorage.setItem(NOTEPAD_BACKUP_KEY, serialized);
+                localStorage.setItem(NOTEPAD_DELETED_KEY, JSON.stringify(Array.from(deletedNoteIds)));
             } catch (e) {
                 console.error("Local notes save error:", e);
             }
@@ -13719,12 +13738,21 @@
         async function pushNotesToCloud(notesArray) {
             updateSyncStatus('syncing');
             const key = getActiveSecretKey();
-            const payload = notesArray.map(n => ({
-                id: n.id,
-                date: n.date,
-                timestamp: getNoteTimestamp(n),
-                payload: encryptNoteText(n.text, key)
-            }));
+            const payloadNotes = notesArray
+                .filter(n => n && n.id && !deletedNoteIds.has(n.id))
+                .map(n => ({
+                    id: n.id,
+                    date: n.date,
+                    timestamp: getNoteTimestamp(n),
+                    payload: encryptNoteText(n.text, key)
+                }));
+
+            const cloudPayload = {
+                version: 2,
+                lastUpdated: Date.now(),
+                deletedIds: Array.from(deletedNoteIds),
+                notes: payloadNotes
+            };
 
             try {
                 const resp = await fetch(NOTEPAD_CLOUD_ENDPOINT, {
@@ -13733,7 +13761,7 @@
                         'Content-Type': 'application/json',
                         'Accept': 'application/json'
                     },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(cloudPayload)
                 });
                 if (resp.ok) {
                     updateSyncStatus('synced');
@@ -13777,15 +13805,26 @@
 
             if (remoteData !== null) {
                 let remoteNotesList = [];
+                let remoteDeletedIds = [];
+
                 if (Array.isArray(remoteData)) {
+                    // Legacy array
                     remoteNotesList = remoteData;
-                } else if (remoteData && typeof remoteData === 'object' && Array.isArray(remoteData.notes)) {
-                    remoteNotesList = remoteData.notes;
+                } else if (remoteData && typeof remoteData === 'object') {
+                    if (Array.isArray(remoteData.notes)) {
+                        remoteNotesList = remoteData.notes;
+                    }
+                    if (Array.isArray(remoteData.deletedIds)) {
+                        remoteDeletedIds = remoteData.deletedIds;
+                    }
                 }
 
-                // Filter out test notes and decrypt
+                // Merge remote tombstones into local tombstones
+                remoteDeletedIds.forEach(id => deletedNoteIds.add(id));
+
+                // Decrypt and filter out ANY deleted/tombstoned notes
                 const decryptedList = remoteNotesList
-                    .filter(rn => rn && rn.id && !['note_c', 'note_b', 'note_a', 'test_1', 'test_2', 'note_0'].includes(rn.id))
+                    .filter(rn => rn && rn.id && !deletedNoteIds.has(rn.id))
                     .map(rn => {
                         return {
                             id: rn.id || ('note_' + Math.random().toString(36).substring(2, 8)),
@@ -13796,7 +13835,7 @@
                     })
                     .filter(n => n.text.trim() !== '');
 
-                // Single source of truth update
+                // Authoritative cloud update
                 cachedNotes = decryptedList;
                 sortNotesChronologically();
                 saveLocalNotes();
@@ -13813,11 +13852,17 @@
 
         async function addNote() {
             const input = document.getElementById('noteInput');
+            const submitBtn = document.getElementById('noteSubmitBtn');
             const text = (input ? input.value : "").trim();
 
             if (!text) {
                 if (input) input.focus();
                 return;
+            }
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.7';
             }
 
             const now = new Date();
@@ -13839,10 +13884,18 @@
 
             // Immediately push to cloud
             await pushNotesToCloud(cachedNotes);
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+            }
         }
 
         async function deleteNote(noteId) {
             if (!confirm("Bu notu silmek istediğinize emin misiniz?")) return;
+
+            // Mark as permanently tombstoned
+            deletedNoteIds.add(noteId);
 
             // Remove from active notes array
             cachedNotes = cachedNotes.filter(n => n.id !== noteId);
@@ -13851,7 +13904,7 @@
             saveLocalNotes();
             renderNotesList();
 
-            // Immediately push updated array to cloud (so it is removed from all devices)
+            // Immediately push updated array & tombstone list to cloud
             await pushNotesToCloud(cachedNotes);
         }
 
