@@ -13469,6 +13469,8 @@
         // ==========================================
         // 🔒 SECURE END-TO-END ENCRYPTED MULTI-DEVICE NOTEPAD ENGINE (SINGLE-SOURCE-OF-TRUTH)
         // ==========================================
+        // 🔒 SECURE END-TO-END ENCRYPTED MULTI-DEVICE NOTEPAD ENGINE (SINGLE SOURCE OF TRUTH)
+        // ==========================================
         const NOTEPAD_STORAGE_KEY = "pikos_kpss_user_notes";
         const NOTEPAD_BACKUP_KEY = "pikos_kpss_user_notes_backup";
         const NOTEPAD_CLOUD_ENDPOINT = "https://jsonblob.com/api/jsonBlob/019fdc7f-24be-7ebf-bd53-a66c6fd2b9c5";
@@ -13562,7 +13564,7 @@
             const [_, nonce, mac, hexCipher] = parts;
             const expectedMac = pureJsSha256(secretKey + ":mac:" + nonce + ":" + hexCipher).substring(0, 16);
             if (mac !== expectedMac) {
-                return '[Şifre Doğrulanamadı]';
+                return '';
             }
             
             const cipherBytes = [];
@@ -13625,7 +13627,8 @@
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed)) {
-                        cachedNotes = parsed;
+                        // Filter out test notes
+                        cachedNotes = parsed.filter(n => n && n.id && !['note_c', 'note_b', 'note_a', 'test_1', 'test_2', 'note_0'].includes(n.id));
                         sortNotesChronologically();
                     }
                 }
@@ -13780,15 +13783,18 @@
                     remoteNotesList = remoteData.notes;
                 }
 
-                // Decrypt and format remote notes
-                const decryptedList = remoteNotesList.map(rn => {
-                    return {
-                        id: rn.id || ('note_' + Math.random().toString(36).substring(2, 8)),
-                        text: decryptNoteText(rn.payload || rn.text || '', key),
-                        date: rn.date || '',
-                        timestamp: rn.timestamp || getNoteTimestamp(rn)
-                    };
-                }).filter(n => n.text.trim() !== '');
+                // Filter out test notes and decrypt
+                const decryptedList = remoteNotesList
+                    .filter(rn => rn && rn.id && !['note_c', 'note_b', 'note_a', 'test_1', 'test_2', 'note_0'].includes(rn.id))
+                    .map(rn => {
+                        return {
+                            id: rn.id || ('note_' + Math.random().toString(36).substring(2, 8)),
+                            text: decryptNoteText(rn.payload || rn.text || '', key),
+                            date: rn.date || '',
+                            timestamp: rn.timestamp || getNoteTimestamp(rn)
+                        };
+                    })
+                    .filter(n => n.text.trim() !== '');
 
                 // Single source of truth update
                 cachedNotes = decryptedList;
