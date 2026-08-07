@@ -13465,16 +13465,17 @@
         // ==========================================
         // 🔒 SECURE END-TO-END ENCRYPTED MULTI-DEVICE NOTEPAD ENGINE
         // ==========================================
+        // 🔒 SECURE END-TO-END ENCRYPTED MULTI-DEVICE NOTEPAD ENGINE (WITH TOMBSTONES & ROBUST SYNC)
+        // ==========================================
         const NOTEPAD_STORAGE_KEY = "pikos_kpss_user_notes";
         const NOTEPAD_BACKUP_KEY = "pikos_kpss_user_notes_backup";
-        const NOTEPAD_CLOUD_ENDPOINTS = [
-            "https://jsonblob.com/api/jsonBlob/019fdc7f-24be-7ebf-bd53-a66c6fd2b9c5",
-            "https://jsonblob.com/api/jsonBlob/019fdc81-94aa-7681-9eea-dbede5087d50"
-        ];
+        const NOTEPAD_DELETED_KEY = "pikos_kpss_deleted_notes";
+        const NOTEPAD_CLOUD_ENDPOINT = "https://jsonblob.com/api/jsonBlob/019fdc7f-24be-7ebf-bd53-a66c6fd2b9c5";
         
         let cachedNotes = [];
+        let deletedNoteIds = new Set();
         let isSyncingNotes = false;
-        let noteSyncInterval = null;
+        let pendingCloudSyncTimeout = null;
 
         function getActiveSecretKey() {
             return localStorage.getItem('pikos_auth_token') || sessionStorage.getItem('pikos_auth_token') || PRIMARY_AUTH_TOKEN;
@@ -13488,7 +13489,7 @@
                 if (c < 0x80) bytes.push(c);
                 else if (c < 0x800) {
                     bytes.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
-                } else if (c < 0xd800 || code_check(c)) {
+                } else if (c < 0xd800 || c >= 0xe000) {
                     bytes.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
                 } else {
                     i++;
@@ -13497,10 +13498,6 @@
                 }
             }
             return bytes;
-        }
-
-        function code_check(c) {
-            return c >= 0xe000;
         }
 
         function utf8Decode(bytes) {
@@ -13622,14 +13619,23 @@
             }
         }
 
-        // Initialize notes from local storage immediately
         function loadLocalNotes() {
             try {
+                // Load deleted IDs tombstone set
+                const deletedSaved = localStorage.getItem(NOTEPAD_DELETED_KEY);
+                if (deletedSaved) {
+                    const parsedDeleted = JSON.parse(deletedSaved);
+                    if (Array.isArray(parsedDeleted)) {
+                        deletedNoteIds = new Set(parsedDeleted);
+                    }
+                }
+
+                // Load active cached notes
                 const saved = localStorage.getItem(NOTEPAD_STORAGE_KEY) || localStorage.getItem(NOTEPAD_BACKUP_KEY);
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed)) {
-                        cachedNotes = parsed;
+                        cachedNotes = parsed.filter(n => n && n.id && !deletedNoteIds.has(n.id));
                         sortNotesChronologically();
                     }
                 }
@@ -13644,35 +13650,25 @@
                 const serialized = JSON.stringify(cachedNotes);
                 localStorage.setItem(NOTEPAD_STORAGE_KEY, serialized);
                 localStorage.setItem(NOTEPAD_BACKUP_KEY, serialized);
+                localStorage.setItem(NOTEPAD_DELETED_KEY, JSON.stringify(Array.from(deletedNoteIds)));
             } catch (e) {
                 console.error("Local notes save error:", e);
             }
             updateNotesBadge();
         }
 
-        function openNotepad() {
-            const overlay = document.getElementById('notepadOverlay');
-            if (!overlay) return;
-            overlay.classList.remove('hidden');
-            loadLocalNotes();
-            renderNotesList();
-            fetchNotes(false);
-            makeElementDraggable(document.getElementById('pomodoro'), document.querySelector('.pomo-drag-handle'));
-            updatePomoDisplay();
-            setTimeout(() => {
-                const noteInput = document.getElementById('noteInput');
-                if (noteInput) noteInput.focus();
-            }, 250);
-        }
-
-        function closeNotepad() {
-            const overlay = document.getElementById('notepadOverlay');
-            if (overlay) overlay.classList.add('hidden');
-        }
-
-        function handleNotepadOverlayClick(e) {
-            if (e.target.id === 'notepadOverlay') {
-                closeNotepad();
+        function updateSyncStatus(status) {
+            const countLabel = document.getElementById('notesCountLabel');
+            if (!countLabel) return;
+            const count = cachedNotes.length;
+            if (status === 'syncing') {
+                countLabel.innerHTML = `${count} Not &nbsp;<span style="color: #60a5fa; font-size: 0.8rem; font-weight: normal;">🔄 Eşitleniyor...</span>`;
+            } else if (status === 'synced') {
+                countLabel.innerHTML = `${count} Not &nbsp;<span style="color: #34d399; font-size: 0.8rem; font-weight: normal;">🟢 Eşitlendi</span>`;
+            } else if (status === 'offline') {
+                countLabel.innerHTML = `${count} Not &nbsp;<span style="color: #fbbf24; font-size: 0.8rem; font-weight: normal;">💾 Yerel Kayıtlı</span>`;
+            } else {
+                countLabel.textContent = count + " Not";
             }
         }
 
@@ -13689,8 +13685,7 @@
                 }
             }
 
-            const countLabel = document.getElementById('notesCountLabel');
-            if (countLabel) countLabel.textContent = count + " Not";
+            updateSyncStatus('default');
         }
 
         function renderNotesList() {
@@ -13729,18 +13724,43 @@
             return div.innerHTML;
         }
 
-        async function syncCloudPayload(cloudData) {
-            const promises = NOTEPAD_CLOUD_ENDPOINTS.map(url => {
-                return fetch(url, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(cloudData)
-                }).catch(e => null);
-            });
-            await Promise.all(promises);
+        function queueCloudSync(delayMs = 200) {
+            if (pendingCloudSyncTimeout) {
+                clearTimeout(pendingCloudSyncTimeout);
+            }
+            updateSyncStatus('syncing');
+            pendingCloudSyncTimeout = setTimeout(async () => {
+                const key = getActiveSecretKey();
+                const cloudPayload = {
+                    notes: cachedNotes.map(n => ({
+                        id: n.id,
+                        date: n.date,
+                        timestamp: getNoteTimestamp(n),
+                        payload: encryptNoteText(n.text, key)
+                    })),
+                    deleted: Array.from(deletedNoteIds)
+                };
+
+                try {
+                    const resp = await fetch(NOTEPAD_CLOUD_ENDPOINT, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify(cloudPayload)
+                    });
+                    if (resp.ok) {
+                        updateSyncStatus('synced');
+                        setTimeout(() => updateSyncStatus('default'), 3000);
+                    } else {
+                        updateSyncStatus('offline');
+                    }
+                } catch (e) {
+                    console.warn("Cloud sync network error:", e);
+                    updateSyncStatus('offline');
+                }
+            }, delayMs);
         }
 
         async function fetchNotes(showLoadingAnim = false) {
@@ -13754,39 +13774,54 @@
 
             if (isSyncingNotes) return;
             isSyncingNotes = true;
+            updateSyncStatus('syncing');
 
             const key = getActiveSecretKey();
-            let remoteNotes = null;
+            let remoteData = null;
 
-            for (const endpoint of NOTEPAD_CLOUD_ENDPOINTS) {
-                try {
-                    const response = await fetch(endpoint, {
-                        method: 'GET',
-                        headers: { 'Accept': 'application/json' }
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (Array.isArray(data)) {
-                            remoteNotes = data;
-                            break;
-                        } else if (data && Array.isArray(data.notes)) {
-                            remoteNotes = data.notes;
-                            break;
-                        }
-                    }
-                } catch (err) {
-                    // Try next endpoint
+            try {
+                const response = await fetch(NOTEPAD_CLOUD_ENDPOINT, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (response.ok) {
+                    remoteData = await response.json();
                 }
+            } catch (err) {
+                console.warn("Failed to fetch cloud notes:", err);
             }
 
-            if (remoteNotes && Array.isArray(remoteNotes)) {
-                let hasChanges = false;
+            if (remoteData) {
+                let remoteNotes = [];
+                let remoteDeleted = [];
+
+                if (Array.isArray(remoteData)) {
+                    remoteNotes = remoteData;
+                } else if (remoteData && typeof remoteData === 'object') {
+                    if (Array.isArray(remoteData.notes)) remoteNotes = remoteData.notes;
+                    if (Array.isArray(remoteData.deleted)) remoteDeleted = remoteData.deleted;
+                }
+
+                // 1. Merge remote deleted IDs into local tombstone set
+                let deletionsUpdated = false;
+                remoteDeleted.forEach(delId => {
+                    if (delId && !deletedNoteIds.has(delId)) {
+                        deletedNoteIds.add(delId);
+                        deletionsUpdated = true;
+                    }
+                });
+
+                // Remove any local notes that were deleted elsewhere
+                const originalLength = cachedNotes.length;
+                cachedNotes = cachedNotes.filter(n => n && n.id && !deletedNoteIds.has(n.id));
+                let hasChanges = deletionsUpdated || (cachedNotes.length !== originalLength);
+
+                // 2. Merge remote notes into local (ignoring any deleted IDs)
                 const localMap = new Map();
                 cachedNotes.forEach(n => localMap.set(n.id, n));
 
-                // Process remote notes (decrypt if encrypted)
                 remoteNotes.forEach(rn => {
-                    if (rn && rn.id) {
+                    if (rn && rn.id && !deletedNoteIds.has(rn.id)) {
                         const decryptedText = decryptNoteText(rn.payload || rn.text, key);
                         if (!localMap.has(rn.id)) {
                             cachedNotes.push({
@@ -13801,31 +13836,18 @@
                     }
                 });
 
-                if (hasChanges) {
-                    saveLocalNotes();
-                    renderNotesList();
-                }
-
-                // If local had new notes not in remote, sync full set back to cloud
-                if (cachedNotes.length > remoteNotes.length) {
-                    sortNotesChronologically();
-                    const fullCloudPayload = cachedNotes.map(n => ({
-                        id: n.id,
-                        date: n.date,
-                        timestamp: getNoteTimestamp(n),
-                        payload: encryptNoteText(n.text, key)
-                    }));
-                    syncCloudPayload(fullCloudPayload);
-                }
-            } else if (cachedNotes.length > 0) {
                 sortNotesChronologically();
-                const fullCloudPayload = cachedNotes.map(n => ({
-                    id: n.id,
-                    date: n.date,
-                    timestamp: getNoteTimestamp(n),
-                    payload: encryptNoteText(n.text, key)
-                }));
-                syncCloudPayload(fullCloudPayload);
+                saveLocalNotes();
+                renderNotesList();
+                updateSyncStatus('synced');
+                setTimeout(() => updateSyncStatus('default'), 3000);
+
+                // If local had new notes or new deletions not in cloud, sync cloud with full master state
+                if (hasChanges || cachedNotes.length !== remoteNotes.length || deletedNoteIds.size !== remoteDeleted.length) {
+                    queueCloudSync(500);
+                }
+            } else {
+                updateSyncStatus('offline');
             }
 
             isSyncingNotes = false;
@@ -13852,37 +13874,57 @@
                 timestamp: Date.now()
             };
 
+            // If it was somehow previously marked deleted, remove from deleted set
+            deletedNoteIds.delete(newNote.id);
+
             cachedNotes.unshift(newNote);
             saveLocalNotes();
             renderNotesList();
             if (input) input.value = '';
 
-            // Async background cloud sync
-            const key = getActiveSecretKey();
-            const cloudPayload = cachedNotes.map(n => ({
-                id: n.id,
-                date: n.date,
-                timestamp: getNoteTimestamp(n),
-                payload: encryptNoteText(n.text, key)
-            }));
-            syncCloudPayload(cloudPayload);
+            queueCloudSync(100);
         }
 
         function deleteNote(noteId) {
             if (!confirm("Bu notu silmek istediğinize emin misiniz?")) return;
 
+            // Mark as permanently deleted in tombstones
+            deletedNoteIds.add(noteId);
+
+            // Remove from active notes
             cachedNotes = cachedNotes.filter(n => n.id !== noteId);
+            
             saveLocalNotes();
             renderNotesList();
 
-            const key = getActiveSecretKey();
-            const cloudPayload = cachedNotes.map(n => ({
-                id: n.id,
-                date: n.date,
-                timestamp: getNoteTimestamp(n),
-                payload: encryptNoteText(n.text, key)
-            }));
-            syncCloudPayload(cloudPayload);
+            // Push updated state to cloud
+            queueCloudSync(100);
+        }
+
+        function openNotepad() {
+            const overlay = document.getElementById('notepadOverlay');
+            if (!overlay) return;
+            overlay.classList.remove('hidden');
+            loadLocalNotes();
+            renderNotesList();
+            fetchNotes(false);
+            makeElementDraggable(document.getElementById('pomodoro'), document.querySelector('.pomo-drag-handle'));
+            updatePomoDisplay();
+            setTimeout(() => {
+                const noteInput = document.getElementById('noteInput');
+                if (noteInput) noteInput.focus();
+            }, 250);
+        }
+
+        function closeNotepad() {
+            const overlay = document.getElementById('notepadOverlay');
+            if (overlay) overlay.classList.add('hidden');
+        }
+
+        function handleNotepadOverlayClick(e) {
+            if (e.target.id === 'notepadOverlay') {
+                closeNotepad();
+            }
         }
 
         function exportNotesToFile() {
@@ -13903,16 +13945,10 @@
             URL.revokeObjectURL(a.href);
         }
 
-        // Initialize notes on page load immediately and set background periodic sync
+        // Initialize notes on page load immediately
         loadLocalNotes();
         setTimeout(updateNotesBadge, 100);
-        setTimeout(() => { fetchNotes(false); }, 1500);
-
-        if (!noteSyncInterval) {
-            noteSyncInterval = setInterval(() => {
-                fetchNotes(false);
-            }, 45000);
-        }
+        setTimeout(() => { fetchNotes(false); }, 1000);
 
         // Pomodoro Timer Logic with Visibility/Background Sync
         let pomoTime = 25 * 60;
