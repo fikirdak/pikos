@@ -3116,15 +3116,6 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg>
         </button>
 
-        <button class="btn" onclick="prevCard()" title="Önceki Soru">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-            Önceki
-        </button>
-        <button class="btn btn-primary" onclick="nextCard()" title="Sonraki Soru">
-            Sonraki
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
-        </button>
-
         <button class="btn" style="background-color: #ef4444; color: white; border: none; padding: 0.75rem 1.25rem;" onclick="markAsWrong()" title="8 kart sonra tekrar göster">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             Bilemedim
@@ -3132,6 +3123,14 @@
         <button class="btn" style="background-color: #10b981; color: white; border: none; padding: 0.75rem 1.25rem;" onclick="markAsLearned()" title="Soruyu en sona gönder">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
             Öğrendim
+        </button>
+        <button class="btn" onclick="prevCard()" title="Önceki Soru">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+            Önceki
+        </button>
+        <button class="btn btn-primary" onclick="nextCard()" title="Sonraki Soru">
+            Sonraki
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
         </button>
     </div>
 
@@ -13461,13 +13460,131 @@
         }
 
         // ==========================================
-        // PERMANENT LOCAL-FIRST NOTEPAD ENGINE (BULLETPROOF STORAGE)
+        // ==========================================
+        // 🔒 SECURE END-TO-END ENCRYPTED MULTI-DEVICE NOTEPAD ENGINE
         // ==========================================
         const NOTEPAD_STORAGE_KEY = "pikos_kpss_user_notes";
         const NOTEPAD_BACKUP_KEY = "pikos_kpss_user_notes_backup";
-        const NOTEPAD_CLOUD_URL = "https://jsonblob.com/api/jsonBlob/019fc3b3-229b-7025-9aac-5fa6d62b90c6";
+        const NOTEPAD_CLOUD_ENDPOINTS = [
+            "https://jsonblob.com/api/jsonBlob/019fdc7f-24be-7ebf-bd53-a66c6fd2b9c5",
+            "https://jsonblob.com/api/jsonBlob/019fdc81-94aa-7681-9eea-dbede5087d50"
+        ];
+        
         let cachedNotes = [];
-        let isFetchingNotes = false;
+        let isSyncingNotes = false;
+        let noteSyncInterval = null;
+
+        function getActiveSecretKey() {
+            return localStorage.getItem('pikos_auth_token') || sessionStorage.getItem('pikos_auth_token') || PRIMARY_AUTH_TOKEN;
+        }
+
+        function utf8Encode(str) {
+            if (!str) return [];
+            const bytes = [];
+            for (let i = 0; i < str.length; i++) {
+                let c = str.charCodeAt(i);
+                if (c < 0x80) bytes.push(c);
+                else if (c < 0x800) {
+                    bytes.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+                } else if (c < 0xd800 || c >= 0xe000) {
+                    bytes.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+                } else {
+                    i++;
+                    c = 0x10000 + (((c & 0x3ff) << 10) | (str.charCodeAt(i) & 0x3ff));
+                    bytes.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 0x3f), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+                }
+            }
+            return bytes;
+        }
+
+        function utf8Decode(bytes) {
+            if (!bytes || !bytes.length) return '';
+            let str = '';
+            let i = 0;
+            while (i < bytes.length) {
+                let b1 = bytes[i++];
+                if (b1 < 0x80) {
+                    str += String.fromCharCode(b1);
+                } else if ((b1 >> 5) === 0x06) {
+                    let b2 = bytes[i++];
+                    str += String.fromCharCode(((b1 & 0x1f) << 6) | (b2 & 0x3f));
+                } else if ((b1 >> 4) === 0x0e) {
+                    let b2 = bytes[i++];
+                    let b3 = bytes[i++];
+                    str += String.fromCharCode(((b1 & 0x0f) << 12) | ((b2 & 0x3f) << 6) | (b3 & 0x3f));
+                } else if ((b1 >> 3) === 0x1e) {
+                    let b2 = bytes[i++];
+                    let b3 = bytes[i++];
+                    let b4 = bytes[i++];
+                    let cp = (((b1 & 0x07) << 18) | ((b2 & 0x3f) << 12) | ((b3 & 0x3f) << 6) | (b4 & 0x3f)) - 0x10000;
+                    str += String.fromCharCode((cp >> 10) + 0xd800, (cp & 0x3ff) + 0xdc00);
+                }
+            }
+            return str;
+        }
+
+        function encryptNoteText(plainText, secretKey) {
+            if (!plainText) return '';
+            const plainBytes = utf8Encode(plainText);
+            const nonce = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+            const cipherBytes = [];
+            
+            let blockIndex = 0;
+            let keyStream = [];
+            
+            for (let i = 0; i < plainBytes.length; i++) {
+                if (i % 32 === 0) {
+                    const blockHash = pureJsSha256(secretKey + ":" + nonce + ":" + blockIndex);
+                    keyStream = [];
+                    for (let k = 0; k < 64; k += 2) {
+                        keyStream.push(parseInt(blockHash.substr(k, 2), 16));
+                    }
+                    blockIndex++;
+                }
+                cipherBytes.push(plainBytes[i] ^ keyStream[i % 32]);
+            }
+            
+            const hexCipher = cipherBytes.map(b => b.toString(16).padStart(2, '0')).join('');
+            const mac = pureJsSha256(secretKey + ":mac:" + nonce + ":" + hexCipher).substring(0, 16);
+            return "ENC:" + nonce + ":" + mac + ":" + hexCipher;
+        }
+
+        function decryptNoteText(encStr, secretKey) {
+            if (!encStr || typeof encStr !== 'string') return '';
+            if (!encStr.startsWith('ENC:')) return encStr;
+            
+            const parts = encStr.split(':');
+            if (parts.length !== 4) return encStr;
+            
+            const [_, nonce, mac, hexCipher] = parts;
+            const expectedMac = pureJsSha256(secretKey + ":mac:" + nonce + ":" + hexCipher).substring(0, 16);
+            if (mac !== expectedMac) {
+                return '[Şifre Doğrulanamadı]';
+            }
+            
+            const cipherBytes = [];
+            for (let i = 0; i < hexCipher.length; i += 2) {
+                cipherBytes.push(parseInt(hexCipher.substr(i, 2), 16));
+            }
+            
+            const plainBytes = [];
+            let blockIndex = 0;
+            let keyStream = [];
+            
+            for (let i = 0; i < cipherBytes.length; i++) {
+                if (i % 32 === 0) {
+                    const blockHash = pureJsSha256(secretKey + ":" + nonce + ":" + blockIndex);
+                    keyStream = [];
+                    for (let k = 0; k < 64; k += 2) {
+                        keyStream.push(parseInt(blockHash.substr(k, 2), 16));
+                    }
+                    blockIndex++;
+                }
+                plainBytes.push(cipherBytes[i] ^ keyStream[i % 32]);
+            }
+            
+            return utf8Decode(plainBytes);
+        }
 
         // Initialize notes from local storage immediately
         function loadLocalNotes() {
@@ -13475,30 +13592,30 @@
                 const saved = localStorage.getItem(NOTEPAD_STORAGE_KEY) || localStorage.getItem(NOTEPAD_BACKUP_KEY);
                 if (saved) {
                     const parsed = JSON.parse(saved);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
+                    if (Array.isArray(parsed)) {
                         cachedNotes = parsed;
-                        return true;
                     }
                 }
             } catch (e) {
                 console.error("Local notes load error:", e);
             }
-            return false;
         }
 
         function saveLocalNotes() {
             try {
-                const data = JSON.stringify(cachedNotes);
-                localStorage.setItem(NOTEPAD_STORAGE_KEY, data);
-                localStorage.setItem(NOTEPAD_BACKUP_KEY, data);
+                const serialized = JSON.stringify(cachedNotes);
+                localStorage.setItem(NOTEPAD_STORAGE_KEY, serialized);
+                localStorage.setItem(NOTEPAD_BACKUP_KEY, serialized);
             } catch (e) {
                 console.error("Local notes save error:", e);
             }
+            updateNotesBadge();
         }
 
         function openNotepad() {
             const overlay = document.getElementById('notepadOverlay');
-            if (overlay) overlay.classList.remove('hidden');
+            if (!overlay) return;
+            overlay.classList.remove('hidden');
             loadLocalNotes();
             renderNotesList();
             fetchNotes(false);
@@ -13573,8 +13690,21 @@
             return div.innerHTML;
         }
 
+        async function syncCloudPayload(cloudData) {
+            const promises = NOTEPAD_CLOUD_ENDPOINTS.map(url => {
+                return fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(cloudData)
+                }).catch(e => null);
+            });
+            await Promise.all(promises);
+        }
+
         async function fetchNotes(showLoadingAnim = false) {
-            // First ensure local notes are loaded
             loadLocalNotes();
             renderNotesList();
 
@@ -13583,43 +13713,84 @@
                 refreshBtn.style.animation = 'spin 0.8s linear infinite';
             }
 
-            try {
-                const response = await fetch(NOTEPAD_CLOUD_URL, {
-                    method: 'GET',
-                    headers: { 'Accept': 'application/json' }
+            if (isSyncingNotes) return;
+            isSyncingNotes = true;
+
+            const key = getActiveSecretKey();
+            let remoteNotes = null;
+
+            for (const endpoint of NOTEPAD_CLOUD_ENDPOINTS) {
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'GET',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (Array.isArray(data)) {
+                            remoteNotes = data;
+                            break;
+                        } else if (data && Array.isArray(data.notes)) {
+                            remoteNotes = data.notes;
+                            break;
+                        }
+                    }
+                } catch (err) {
+                    // Try next endpoint
+                }
+            }
+
+            if (remoteNotes && Array.isArray(remoteNotes)) {
+                let hasChanges = false;
+                const localMap = new Map();
+                cachedNotes.forEach(n => localMap.set(n.id, n));
+
+                // Process remote notes (decrypt if encrypted)
+                remoteNotes.forEach(rn => {
+                    if (rn && rn.id) {
+                        const decryptedText = decryptNoteText(rn.payload || rn.text, key);
+                        if (!localMap.has(rn.id)) {
+                            cachedNotes.push({
+                                id: rn.id,
+                                text: decryptedText,
+                                date: rn.date || ''
+                            });
+                            localMap.set(rn.id, true);
+                            hasChanges = true;
+                        }
+                    }
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    let remoteNotes = [];
-                    if (Array.isArray(data)) {
-                        remoteNotes = data;
-                    } else if (data && Array.isArray(data.notes)) {
-                        remoteNotes = data.notes;
-                    }
-                    if (remoteNotes.length > 0) {
-                        // Merge without duplicates
-                        const localIds = new Set(cachedNotes.map(n => n.id));
-                        remoteNotes.forEach(rn => {
-                            if (rn && rn.id && !localIds.has(rn.id)) {
-                                cachedNotes.push(rn);
-                                localIds.add(rn.id);
-                            }
-                        });
-                        saveLocalNotes();
-                        renderNotesList();
-                    }
+                if (hasChanges) {
+                    saveLocalNotes();
+                    renderNotesList();
                 }
-            } catch (err) {
-                // Offline or cloud endpoint unavailable: local notes are safely preserved!
-            } finally {
-                if (refreshBtn) refreshBtn.style.animation = '';
+
+                // If local had new notes not in remote, sync full set back to cloud
+                if (cachedNotes.length > remoteNotes.length) {
+                    const fullCloudPayload = cachedNotes.map(n => ({
+                        id: n.id,
+                        date: n.date,
+                        payload: encryptNoteText(n.text, key)
+                    }));
+                    syncCloudPayload(fullCloudPayload);
+                }
+            } else if (cachedNotes.length > 0) {
+                // If cloud was empty/initialized, populate cloud with local notes
+                const fullCloudPayload = cachedNotes.map(n => ({
+                    id: n.id,
+                    date: n.date,
+                    payload: encryptNoteText(n.text, key)
+                }));
+                syncCloudPayload(fullCloudPayload);
             }
+
+            isSyncingNotes = false;
+            if (refreshBtn) refreshBtn.style.animation = '';
         }
 
         function addNote() {
             const input = document.getElementById('noteInput');
-            const submitBtn = document.getElementById('noteSubmitBtn');
             const text = (input ? input.value : "").trim();
 
             if (!text) {
@@ -13632,7 +13803,7 @@
                             now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' });
 
             const newNote = {
-                id: Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+                id: 'note_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7),
                 text: text,
                 date: dateStr
             };
@@ -13642,17 +13813,14 @@
             renderNotesList();
             if (input) input.value = '';
 
-            // Async background cloud sync if available
-            try {
-                fetch(NOTEPAD_CLOUD_URL, {
-                    method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(cachedNotes)
-                }).catch(() => {});
-            } catch (e) {}
+            // Async background cloud sync
+            const key = getActiveSecretKey();
+            const cloudPayload = cachedNotes.map(n => ({
+                id: n.id,
+                date: n.date,
+                payload: encryptNoteText(n.text, key)
+            }));
+            syncCloudPayload(cloudPayload);
         }
 
         function deleteNote(noteId) {
@@ -13662,16 +13830,13 @@
             saveLocalNotes();
             renderNotesList();
 
-            try {
-                fetch(NOTEPAD_CLOUD_URL, {
-                    method: 'PUT',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(cachedNotes)
-                }).catch(() => {});
-            } catch (e) {}
+            const key = getActiveSecretKey();
+            const cloudPayload = cachedNotes.map(n => ({
+                id: n.id,
+                date: n.date,
+                payload: encryptNoteText(n.text, key)
+            }));
+            syncCloudPayload(cloudPayload);
         }
 
         function exportNotesToFile() {
@@ -13680,10 +13845,7 @@
                 alert("İndirilecek kayıtlı not bulunmuyor.");
                 return;
             }
-            const content = cachedNotes.map((n, i) => `=== Not ${i+1} (${n.date}) ===
-${n.text}
-
-`).join('');
+            const content = cachedNotes.map((n, i) => `=== Not ${i+1} (${n.date}) ===\n${n.text}\n\n`).join('');
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
@@ -13694,9 +13856,16 @@ ${n.text}
             URL.revokeObjectURL(a.href);
         }
 
-        // Initialize notes on page load immediately
+        // Initialize notes on page load immediately and set background periodic sync
         loadLocalNotes();
         setTimeout(updateNotesBadge, 100);
+        setTimeout(() => { fetchNotes(false); }, 1500);
+
+        if (!noteSyncInterval) {
+            noteSyncInterval = setInterval(() => {
+                fetchNotes(false);
+            }, 45000);
+        }
 
         // Pomodoro Timer Logic with Visibility/Background Sync
         let pomoTime = 25 * 60;
