@@ -13463,6 +13463,8 @@
         // ==========================================
         // 🔒 SECURE END-TO-END ENCRYPTED MULTI-DEVICE NOTEPAD ENGINE
         // ==========================================
+        // 🔒 SECURE END-TO-END ENCRYPTED MULTI-DEVICE NOTEPAD ENGINE
+        // ==========================================
         const NOTEPAD_STORAGE_KEY = "pikos_kpss_user_notes";
         const NOTEPAD_BACKUP_KEY = "pikos_kpss_user_notes_backup";
         const NOTEPAD_CLOUD_ENDPOINTS = [
@@ -13486,7 +13488,7 @@
                 if (c < 0x80) bytes.push(c);
                 else if (c < 0x800) {
                     bytes.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
-                } else if (c < 0xd800 || c >= 0xe000) {
+                } else if (c < 0xd800 || code_check(c)) {
                     bytes.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
                 } else {
                     i++;
@@ -13495,6 +13497,10 @@
                 }
             }
             return bytes;
+        }
+
+        function code_check(c) {
+            return c >= 0xe000;
         }
 
         function utf8Decode(bytes) {
@@ -13586,6 +13592,36 @@
             return utf8Decode(plainBytes);
         }
 
+        // Precise timestamp extractor for descending chronological sorting (newest first)
+        function getNoteTimestamp(note) {
+            if (!note) return 0;
+            if (typeof note.timestamp === 'number' && !isNaN(note.timestamp) && note.timestamp > 0) {
+                return note.timestamp;
+            }
+            if (note.date && typeof note.date === 'string') {
+                const m = note.date.match(/(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4})\s*[,]?\s*(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+                if (m) {
+                    const day = parseInt(m[1], 10);
+                    const month = parseInt(m[2], 10) - 1;
+                    const year = parseInt(m[3], 10);
+                    const hour = parseInt(m[4], 10);
+                    const min = parseInt(m[5], 10);
+                    const sec = m[6] ? parseInt(m[6], 10) : 0;
+                    const d = new Date(year, month, day, hour, min, sec);
+                    if (!isNaN(d.getTime())) return d.getTime();
+                }
+                const parsed = Date.parse(note.date);
+                if (!isNaN(parsed)) return parsed;
+            }
+            return 0;
+        }
+
+        function sortNotesChronologically() {
+            if (Array.isArray(cachedNotes)) {
+                cachedNotes.sort((a, b) => getNoteTimestamp(b) - getNoteTimestamp(a));
+            }
+        }
+
         // Initialize notes from local storage immediately
         function loadLocalNotes() {
             try {
@@ -13594,6 +13630,7 @@
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed)) {
                         cachedNotes = parsed;
+                        sortNotesChronologically();
                     }
                 }
             } catch (e) {
@@ -13602,6 +13639,7 @@
         }
 
         function saveLocalNotes() {
+            sortNotesChronologically();
             try {
                 const serialized = JSON.stringify(cachedNotes);
                 localStorage.setItem(NOTEPAD_STORAGE_KEY, serialized);
@@ -13659,6 +13697,7 @@
             const listEl = document.getElementById('notesList');
             if (!listEl) return;
 
+            sortNotesChronologically();
             updateNotesBadge();
 
             if (!cachedNotes || cachedNotes.length === 0) {
@@ -13753,7 +13792,8 @@
                             cachedNotes.push({
                                 id: rn.id,
                                 text: decryptedText,
-                                date: rn.date || ''
+                                date: rn.date || '',
+                                timestamp: rn.timestamp || getNoteTimestamp(rn)
                             });
                             localMap.set(rn.id, true);
                             hasChanges = true;
@@ -13768,18 +13808,21 @@
 
                 // If local had new notes not in remote, sync full set back to cloud
                 if (cachedNotes.length > remoteNotes.length) {
+                    sortNotesChronologically();
                     const fullCloudPayload = cachedNotes.map(n => ({
                         id: n.id,
                         date: n.date,
+                        timestamp: getNoteTimestamp(n),
                         payload: encryptNoteText(n.text, key)
                     }));
                     syncCloudPayload(fullCloudPayload);
                 }
             } else if (cachedNotes.length > 0) {
-                // If cloud was empty/initialized, populate cloud with local notes
+                sortNotesChronologically();
                 const fullCloudPayload = cachedNotes.map(n => ({
                     id: n.id,
                     date: n.date,
+                    timestamp: getNoteTimestamp(n),
                     payload: encryptNoteText(n.text, key)
                 }));
                 syncCloudPayload(fullCloudPayload);
@@ -13805,7 +13848,8 @@
             const newNote = {
                 id: 'note_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 7),
                 text: text,
-                date: dateStr
+                date: dateStr,
+                timestamp: Date.now()
             };
 
             cachedNotes.unshift(newNote);
@@ -13818,6 +13862,7 @@
             const cloudPayload = cachedNotes.map(n => ({
                 id: n.id,
                 date: n.date,
+                timestamp: getNoteTimestamp(n),
                 payload: encryptNoteText(n.text, key)
             }));
             syncCloudPayload(cloudPayload);
@@ -13834,6 +13879,7 @@
             const cloudPayload = cachedNotes.map(n => ({
                 id: n.id,
                 date: n.date,
+                timestamp: getNoteTimestamp(n),
                 payload: encryptNoteText(n.text, key)
             }));
             syncCloudPayload(cloudPayload);
@@ -13845,6 +13891,7 @@
                 alert("İndirilecek kayıtlı not bulunmuyor.");
                 return;
             }
+            sortNotesChronologically();
             const content = cachedNotes.map((n, i) => `=== Not ${i+1} (${n.date}) ===\n${n.text}\n\n`).join('');
             const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
             const a = document.createElement('a');
